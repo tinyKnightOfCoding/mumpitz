@@ -12,5 +12,5 @@
     "emitDecoratorMetadata": true,
     "strict": true,
     "lib": ["es2023"]
-  }
+  },
 }

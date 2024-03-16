@@ -1,0 +1,10 @@
+{
+  "clean": true,
+  "dts": true,
+  "sourcemap": true,
+  "tsconfig": "tsconfig.build.json",
+  "entry": ["src/**/*.ts(x)?"],
+  "bundle": false,
+  "format": ["cjs", "esm"],
+  "outDir": "dist"
+}

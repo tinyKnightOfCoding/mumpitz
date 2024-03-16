@@ -1,0 +1,17 @@
+{
+  "name": "@mumpitz/plugin-zod",
+  "version": "0.1.0",
+  "main": "dist/inde.js",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.mjs",
+  "scripts": {
+    "format": "prettier --check --write src test *.json",
+    "lint": "eslint . --ext .ts --fix",
+    "test": "jest",
+    "build": "tsup"
+  },
+  "dependencies": {
+    "@mumpitz/common": "file:../common"
+  },
+  "files": ["src", "dist"]
+}

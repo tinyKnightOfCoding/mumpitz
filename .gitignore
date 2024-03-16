@@ -1,7 +1,11 @@
 *.iml
 **/.idea/
+.nx/
 **/node_modules/
 **/dist/
+**/out/
 *.tsbuildinfo
+lerna-debug.log
+npm-debug.log
 .envrc
 .DS_Store
