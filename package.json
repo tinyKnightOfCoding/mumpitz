@@ -1,4 +1,8 @@
 {
   "name": "awesome-kitty",
-  "private": true
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "format": "echo Hello"
+  }
 }
