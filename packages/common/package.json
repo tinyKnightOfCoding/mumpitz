@@ -10,5 +10,11 @@
     "test": "jest",
     "build": "tsup"
   },
-  "files": ["src", "dist"]
+  "files": [
+    "src",
+    "dist"
+  ],
+  "devDependencies": {
+    "ts-expect": "^1.3.0"
+  }
 }
