@@ -1,1 +1,3 @@
-npm test
+npm run format
+npm run lint
+git update-index --again

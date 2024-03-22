@@ -5,7 +5,11 @@ export type Serializable<T = unknown> = {
 }
 
 export function isSerializable(subject: unknown): subject is Serializable {
-  return isDefined(subject) && typeof (subject as any).toJSON === 'function' && (subject as any).toJSON.length === 0
+  return (
+    isDefined(subject) &&
+    typeof (subject as Serializable).toJSON === 'function' &&
+    (subject as Serializable).toJSON.length === 0
+  )
 }
 
 export function serialize<T = unknown>(subject: T | Serializable<T>): T {

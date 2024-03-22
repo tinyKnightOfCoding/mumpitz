@@ -1,7 +1,7 @@
 {
   "name": "@mumpitz/plugin-zod",
   "version": "0.1.0",
-  "main": "dist/inde.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "module": "dist/index.mjs",
   "scripts": {
@@ -13,5 +13,8 @@
   "dependencies": {
     "@mumpitz/common": "file:../common"
   },
-  "files": ["src", "dist"]
+  "files": [
+    "src",
+    "dist"
+  ]
 }

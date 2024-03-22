@@ -12,21 +12,21 @@ describe('isSerializable', () => {
   })
 
   it('should return false for any object with toJSON property not being a function', () => {
-    expect(isSerializable({toJSON: 'Hello'})).toBeFalsy()
-    expect(isSerializable({toJSON: 5})).toBeFalsy()
-    expect(isSerializable({toJSON: {}})).toBeFalsy()
-    expect(isSerializable({toJSON: undefined})).toBeFalsy()
-    expect(isSerializable({toJSON: null})).toBeFalsy()
+    expect(isSerializable({ toJSON: 'Hello' })).toBeFalsy()
+    expect(isSerializable({ toJSON: 5 })).toBeFalsy()
+    expect(isSerializable({ toJSON: {} })).toBeFalsy()
+    expect(isSerializable({ toJSON: undefined })).toBeFalsy()
+    expect(isSerializable({ toJSON: null })).toBeFalsy()
   })
 
   it('should return false for any toJSON function with parameters', () => {
-    expect(isSerializable({toJSON: (hello: string) => hello})).toBeFalsy()
-    expect(isSerializable({toJSON: (hello: string, world: number) => hello})).toBeFalsy()
+    expect(isSerializable({ toJSON: (hello: string) => hello })).toBeFalsy()
+    expect(isSerializable({ toJSON: (hello: string, world: number) => `${hello}${world}` })).toBeFalsy()
   })
 
   it('should return true for a a toJSON function callable without parameters', () => {
-    expect(isSerializable({toJSON: () => 'Hello'})).toBeTruthy()
-    expect(isSerializable({toJSON: (...args: string[]) => args})).toBeTruthy()
+    expect(isSerializable({ toJSON: () => 'Hello' })).toBeTruthy()
+    expect(isSerializable({ toJSON: (...args: string[]) => args })).toBeTruthy()
   })
 })
 
@@ -36,10 +36,10 @@ describe('serialize', () => {
     expect(serialize(null)).toEqual(null)
     expect(serialize(undefined)).toEqual(undefined)
     expect(serialize(15)).toEqual(15)
-    expect(serialize({hello: 'World'})).toEqual({ hello: 'World' })
+    expect(serialize({ hello: 'World' })).toEqual({ hello: 'World' })
   })
 
   it('should return result of toJSON given input implements Serializable', () => {
-    expect(serialize({toJSON: () => 'Hello, World!'})).toEqual('Hello, World!')
+    expect(serialize({ toJSON: () => 'Hello, World!' })).toEqual('Hello, World!')
   })
 })

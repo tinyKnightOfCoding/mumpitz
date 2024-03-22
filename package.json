@@ -6,10 +6,12 @@
     "format": "npm run format --workspaces",
     "lint": "npm run lint --workspaces",
     "build": "npm run build --workspaces",
-    "test": "npm run test --workspaces"
+    "test": "npm run test --workspaces",
+    "server": "npm run dev -w example/server"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "example/*"
   ],
   "devDependencies": {
     "@types/jest": "^29.5.12",

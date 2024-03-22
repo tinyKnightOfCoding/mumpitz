@@ -3,7 +3,7 @@ import { Defined, isDefined } from '../../src'
 
 describe('Defined', () => {
   it('should be assignable from any non nullish value', () => {
-    expectType<Defined>("")
+    expectType<Defined>('')
     expectType<Defined>(5)
     expectType<Defined>(() => {})
     expectType<Defined>({})
@@ -24,7 +24,7 @@ describe('isDefined', () => {
 
   it('should infer generic correctly', () => {
     const subject: string | null = createSubject()
-    if(isDefined(subject)) {
+    if (isDefined(subject)) {
       expectType<TypeEqual<string, typeof subject>>(true)
     } else {
       expectType<TypeEqual<null, typeof subject>>(true)
@@ -32,7 +32,7 @@ describe('isDefined', () => {
   })
 
   it('should return true given subject is defined', () => {
-    expect(isDefined("")).toBeTruthy()
+    expect(isDefined('')).toBeTruthy()
     expect(isDefined(5)).toBeTruthy()
     expect(isDefined(() => {})).toBeTruthy()
     expect(isDefined({})).toBeTruthy()

@@ -10,7 +10,7 @@ describe('EmptyObject', () => {
 
   it('should not be assignable from any other value', () => {
     expectType<TypeOf<EmptyObject, EmptyClass>>(false)
-    expectType<TypeOf<EmptyObject, any[]>>(false)
+    expectType<TypeOf<EmptyObject, Date[]>>(false)
     expectType<TypeOf<EmptyObject, null>>(false)
     expectType<TypeOf<EmptyObject, undefined>>(false)
     expectType<TypeOf<EmptyObject, string>>(false)
