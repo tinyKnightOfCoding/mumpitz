@@ -10,7 +10,10 @@
     "test": "jest",
     "build": "tsup"
   },
-  "dependencies": {
+  "peerDependencies": {
+    "@mumpitz/common": "file:../common"
+  },
+  "devDependencies": {
     "@mumpitz/common": "file:../common"
   },
   "files": [
