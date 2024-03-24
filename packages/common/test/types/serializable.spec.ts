@@ -1,4 +1,11 @@
-import { isSerializable, serialize } from '../../src'
+import { isSerializable, Serializable, serialize } from '../../src'
+
+describe('Serializable', () => {
+  it('should be called by JSON.stringify', () => {
+    const serializable: Serializable = { toJSON: () => 'Hello, World!' }
+    expect(JSON.stringify(serializable)).toEqual('"Hello, World!"')
+  })
+})
 
 describe('isSerializable', () => {
   it('should return false for any non object without toJSON property', () => {
@@ -19,14 +26,10 @@ describe('isSerializable', () => {
     expect(isSerializable({ toJSON: null })).toBeFalsy()
   })
 
-  it('should return false for any toJSON function with parameters', () => {
-    expect(isSerializable({ toJSON: (hello: string) => hello })).toBeFalsy()
-    expect(isSerializable({ toJSON: (hello: string, world: number) => `${hello}${world}` })).toBeFalsy()
-  })
-
   it('should return true for a a toJSON function callable without parameters', () => {
     expect(isSerializable({ toJSON: () => 'Hello' })).toBeTruthy()
     expect(isSerializable({ toJSON: (...args: string[]) => args })).toBeTruthy()
+    expect(isSerializable(new Date())).toBeTruthy()
   })
 })
 

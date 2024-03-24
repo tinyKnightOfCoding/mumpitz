@@ -33,6 +33,6 @@ function isDeserializerObject<O = unknown, I extends Json = Json>(
   return (
     isDefined(subject) &&
     typeof (subject as DeserializerObject).deserialize === 'function' &&
-    (subject as DeserializerObject).deserialize.length === 1
+    (subject as DeserializerObject).deserialize.length >= 1
   )
 }

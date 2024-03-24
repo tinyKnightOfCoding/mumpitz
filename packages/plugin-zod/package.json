@@ -11,10 +11,13 @@
     "build": "tsup"
   },
   "peerDependencies": {
-    "@mumpitz/common": "file:../common"
+    "@mumpitz/common": "file:../common",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@mumpitz/common": "file:../common"
+    "@mumpitz/common": "file:../common",
+    "ts-expect": "^1.3.0",
+    "zod": "^3.22.4"
   },
   "files": [
     "src",
