@@ -1,27 +1,30 @@
 import { AnyObject, Json } from '@mumpitz/common'
-import { UnknownKeysParam, ZodObject, ZodRawShape, ZodTypeAny } from 'zod'
+import { UnknownKeysParam, ZodEffects, ZodObject, ZodRawShape, ZodTypeAny } from 'zod'
 import { toReadonlyPropertyDescriptorMap } from './to-readonly-property-discriptor-map'
 import { Copyable } from './copyable'
 
 export type ZodStructConstructor<O = unknown, I extends Json = Json> = {
   new (value: O): ZodStructInstance<O>
-  parse(raw: I): O
-  readonly shape: ZodObject<ZodRawShape, UnknownKeysParam, ZodTypeAny, O, I>
+  shape<T extends ZodStructInstance<O>>(
+    this: new (values: O) => T,
+  ): ZodEffects<ZodObject<ZodRawShape, UnknownKeysParam, ZodTypeAny, O, I>, T, I>
+  deserialize<T extends ZodStructInstance<O>>(this: new (values: O) => T, data: Json): T
 }
 
 export type ZodStructInstance<O = unknown> = Copyable<O> & Readonly<O>
 
-export function ZodStruct<
-  O extends AnyObject,
-  T extends ZodRawShape,
-  I extends Json = Json,
-  UnknownKeys extends UnknownKeysParam = UnknownKeysParam,
-  Catchall extends ZodTypeAny = ZodTypeAny,
->(shape: ZodObject<T, UnknownKeys, Catchall, O, I>): ZodStructConstructor<O, I> {
+export function ZodStruct<O extends AnyObject, I extends Json = Json>(
+  shape: ZodObject<ZodRawShape, UnknownKeysParam, ZodTypeAny, O, I>,
+): ZodStructConstructor<O, I> {
   class _ZodStruct extends ZodStructBase<O> {
-    static readonly shape = shape
-    static parse(raw: I): O {
-      return this.shape.parse(raw)
+    static shape<T extends ZodStructInstance<O>>(
+      this: new (values: O) => T,
+    ): ZodEffects<ZodObject<ZodRawShape, UnknownKeysParam, ZodTypeAny, O, I>, T, I> {
+      return shape.transform(data => new this(data))
+    }
+
+    static deserialize<T extends ZodStructInstance<O>>(this: new (values: O) => T, data: Json): T {
+      return shape.transform(data => new this(data)).parse(data)
     }
   }
   return _ZodStruct as unknown as ZodStructConstructor<O, I>

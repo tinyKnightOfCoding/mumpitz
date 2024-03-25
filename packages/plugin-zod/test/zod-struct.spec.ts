@@ -1,4 +1,3 @@
-import { Json } from '@mumpitz/common'
 import { ZodStruct } from '../src'
 import { z } from 'zod'
 
@@ -9,8 +8,6 @@ class BookDto extends ZodStruct(
     date: z.string().or(z.number()).pipe(z.coerce.date()),
   }),
 ) {
-  static readonly deserialize = (raw: Json) => new BookDto(BookDto.shape.parse(raw))
-
   get computed() {
     return this.id.toUpperCase()
   }
