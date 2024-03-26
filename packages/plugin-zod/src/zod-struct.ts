@@ -3,28 +3,43 @@ import { UnknownKeysParam, ZodEffects, ZodObject, ZodRawShape, ZodTypeAny } from
 import { toReadonlyPropertyDescriptorMap } from './to-readonly-property-discriptor-map'
 import { Copyable } from './copyable'
 
+type ZodStructShape<O = unknown, I extends Json = Json> = ZodObject<ZodRawShape, UnknownKeysParam, ZodTypeAny, O, I>
+
+type ZodStructProp<
+  O = unknown,
+  I extends Json = Json,
+  T extends ZodStructInstance<O> = ZodStructInstance<O>,
+> = ZodEffects<ZodStructShape<O, I>, T, I>
+
+type ActualZodConstructor<O = unknown, I extends Json = Json, T extends ZodStructInstance<O> = ZodStructInstance<O>> = {
+  new (values: O): T
+
+  readonly shape: ZodStructShape<O, I>
+}
+
 export type ZodStructConstructor<O = unknown, I extends Json = Json> = {
   new (value: O): ZodStructInstance<O>
-  shape<T extends ZodStructInstance<O>>(
-    this: new (values: O) => T,
-  ): ZodEffects<ZodObject<ZodRawShape, UnknownKeysParam, ZodTypeAny, O, I>, T, I>
-  deserialize<T extends ZodStructInstance<O>>(this: new (values: O) => T, data: Json): T
+
+  readonly shape: ZodStructShape<O, I>
+
+  prop<T extends ZodStructInstance<O>>(this: ActualZodConstructor<O, I, T>): ZodStructProp<O, I, T>
+
+  deserialize<T extends ZodStructInstance<O>>(this: ActualZodConstructor<O, I, T>, data: Json): T
 }
 
 export type ZodStructInstance<O = unknown> = Copyable<O> & Readonly<O>
 
 export function ZodStruct<O extends AnyObject, I extends Json = Json>(
-  shape: ZodObject<ZodRawShape, UnknownKeysParam, ZodTypeAny, O, I>,
+  shape: ZodStructShape<O, I>,
 ): ZodStructConstructor<O, I> {
   class _ZodStruct extends ZodStructBase<O> {
-    static shape<T extends ZodStructInstance<O>>(
-      this: new (values: O) => T,
-    ): ZodEffects<ZodObject<ZodRawShape, UnknownKeysParam, ZodTypeAny, O, I>, T, I> {
-      return shape.transform(data => new this(data))
+    static readonly shape = shape
+    static prop<T extends ZodStructInstance<O>>(this: ActualZodConstructor<O, I, T>): ZodStructProp<O, I, T> {
+      return this.shape.transform(data => new this(data))
     }
 
-    static deserialize<T extends ZodStructInstance<O>>(this: new (values: O) => T, data: Json): T {
-      return shape.transform(data => new this(data)).parse(data)
+    static deserialize<T extends ZodStructInstance<O>>(this: ActualZodConstructor<O, I, T>, data: Json): T {
+      return this.shape.transform(data => new this(data)).parse(data)
     }
   }
   return _ZodStruct as unknown as ZodStructConstructor<O, I>
