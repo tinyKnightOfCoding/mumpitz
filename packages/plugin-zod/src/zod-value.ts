@@ -1,36 +1,57 @@
 import { JsonPrimitive, Serializable, serialize } from '@mumpitz/common'
-import { ZodType, ZodTypeDef } from 'zod'
+import { z, ZodEffects, ZodType } from 'zod'
 
-export type ZodValueConstructor<
-  O = unknown,
-  I extends JsonPrimitive | undefined = JsonPrimitive | undefined,
-  Def extends ZodTypeDef = ZodTypeDef,
+type ZodValueProp<
+  Z extends ZodType,
+  O = z.output<Z>,
+  I extends JsonPrimitive = z.input<Z>,
+  T extends ZodValueInstance<O> = ZodValueInstance<O>,
+> = ZodEffects<Z, T, I>
+
+type ActualZodValueConstructor<
+  Z extends ZodType,
+  O = z.output<Z>,
+  T extends ZodValueInstance<O> = ZodValueInstance<O>,
 > = {
+  new (value: O): T
+
+  readonly schema: Z
+}
+
+export type ZodValueConstructor<Z extends ZodType, O = z.output<Z>, I extends JsonPrimitive = z.input<Z>> = {
   new (value: O): ZodValueInstance<O>
-  parse(raw: I): O
-  readonly shape: ZodType<O, Def, I>
+
+  readonly schema: Z
+
+  prop<T extends ZodValueInstance<O>>(this: ActualZodValueConstructor<Z, O, T>): ZodValueProp<Z, O, I, T>
+
+  deserialize<T extends ZodValueInstance<O>>(this: ActualZodValueConstructor<Z, O, T>, data: JsonPrimitive): T
 }
 
 export type ZodValueInstance<O = unknown> = Serializable & { readonly value: O }
 
-export function ZodValue<
-  O = unknown,
-  I extends JsonPrimitive | undefined = JsonPrimitive | undefined,
-  Def extends ZodTypeDef = ZodTypeDef,
->(shape: ZodType<O, Def, I>): ZodValueConstructor<O, I> {
-  class _ZodValue extends ZodValueBase<O> {
-    static readonly shape = shape
-    static parse(raw: I): O {
-      return this.shape.parse(raw)
+export function ZodValue<Z extends ZodType, O = z.output<Z>, I extends JsonPrimitive = z.input<Z>>(
+  shape: Z,
+): ZodValueConstructor<Z, O, I> {
+  class _ZodValue implements ZodValueInstance<O> {
+    static readonly schema = shape
+
+    constructor(readonly value: O) {}
+
+    static prop<T extends ZodValueInstance<O>>(this: ActualZodValueConstructor<Z, O, T>): ZodValueProp<Z, O, I, T> {
+      return this.schema.transform(data => new this(data))
+    }
+
+    static deserialize<T extends ZodValueInstance<O>>(
+      this: ActualZodValueConstructor<Z, O, T>,
+      data: JsonPrimitive,
+    ): T {
+      return new this(this.schema.parse(data))
+    }
+
+    toJSON() {
+      return serialize(this.value)
     }
   }
-  return _ZodValue as ZodValueConstructor<O, I>
-}
-
-class ZodValueBase<O> implements Serializable {
-  constructor(readonly value: O) {}
-
-  toJSON() {
-    return serialize(this.value)
-  }
+  return _ZodValue
 }

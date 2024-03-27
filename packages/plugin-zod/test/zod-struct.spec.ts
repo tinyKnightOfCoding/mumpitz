@@ -1,13 +1,11 @@
 import { ZodStruct } from '../src'
 import { z } from 'zod'
 
-class BookDto extends ZodStruct(
-  z.object({
-    id: z.string().toLowerCase(),
-    title: z.string(),
-    date: z.string().or(z.number()).pipe(z.coerce.date()),
-  }),
-) {
+class BookDto extends ZodStruct({
+  id: z.string().toLowerCase(),
+  title: z.string(),
+  date: z.string().or(z.number()).pipe(z.coerce.date()),
+}) {
   get computed() {
     return this.id.toUpperCase()
   }

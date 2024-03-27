@@ -1,18 +1,15 @@
-import { ZodValue } from '../src/zod-value'
+import { ZodValue } from '../src'
 import { z } from 'zod'
-import { JsonPrimitive } from '@mumpitz/common'
 import { expectType, TypeEqual } from 'ts-expect'
 
-class BookId extends ZodValue(z.string().default('Hello, World!')) {
-  static readonly deserialize = (raw: JsonPrimitive | undefined) => new BookId(BookId.shape.parse(raw))
-}
+class BookId extends ZodValue(z.string()) {}
 
-class DateValue extends ZodValue<Date>(z.string().or(z.number()).pipe(z.coerce.date())) {
-  static readonly deserialize = (raw: JsonPrimitive | undefined) => new DateValue(DateValue.shape.parse(raw))
-}
+const dateShape = z.string().or(z.number()).pipe(z.coerce.date())
+
+class DateValue extends ZodValue(dateShape) {}
 
 describe('ZodValue', () => {
-  const bookId = BookId.deserialize(undefined)
+  const bookId = BookId.deserialize('Hello, World!')
   const date = DateValue.deserialize('2024-01-01')
 
   it('should have value property', () => {
