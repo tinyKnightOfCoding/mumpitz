@@ -3,11 +3,12 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
-    "format": "npm run format --workspaces",
-    "lint": "npm run lint --workspaces",
-    "build": "npm run build --workspaces",
-    "test": "npm run test --workspaces",
-    "server": "npm run dev -w example/server"
+    "format": "lerna run format",
+    "lint": "lerna run lint",
+    "build": "lerna run build",
+    "test": "lerna run test",
+    "watch": "lerna watch -- lerna run build --scope=\\$LERNA_PACKAGE_NAME --include-dependents",
+    "server": "lerna watch -- lerna run dev --scope @mumpitz/example-server"
   },
   "workspaces": [
     "packages/*",
