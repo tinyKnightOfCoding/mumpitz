@@ -22,7 +22,6 @@
   "devDependencies": {
     "@mumpitz/common": "file:../../packages/common",
     "@mumpitz/plugin-zod": "file:../../packages/plugin-zod",
-    "uuidv7": "^0.6.3",
     "zod": "^3.22.4"
   }
 }
