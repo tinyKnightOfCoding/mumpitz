@@ -5,7 +5,7 @@ import { Json } from '../types'
 export type RawRequest = {
   query: RawQuery
   params: RawParams
-  body: Json
+  body: Json | undefined
 }
 
 export class Request<Q extends Query, P extends Params, R> {

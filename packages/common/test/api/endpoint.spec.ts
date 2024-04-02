@@ -1,7 +1,7 @@
 import { endpoint, Json, Parser, RawParams, RawQuery } from '../../src'
 
 describe('Endpoint', () => {
-  it('should deserialize request', () => {
+  it('should parse request', () => {
     const aEndpoint = endpoint({
       method: 'get',
       path: '/endpoints',
@@ -12,7 +12,7 @@ describe('Endpoint', () => {
     const query: RawQuery = { raw: 'query' }
     const params: RawParams = { raw: 'params' }
     const body: Json = { raw: 'body' }
-    const result = aEndpoint.deserialize({ query, params, body })
+    const result = aEndpoint.parse({ query, params, body })
     expect(result.query).toEqual({ query: 'Hello' })
     expect(result.params).toEqual({ params: 'Blubb' })
     expect(result.body).toEqual({ body: 'World' })

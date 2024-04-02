@@ -150,8 +150,12 @@ export class Endpoint<Q extends Query, P extends Params, Req, Res> {
     readonly responseBody: Parser<Res>,
   ) {}
 
-  deserialize({ query, params, body }: RawRequest): Request<Q, P, Req> {
-    return new Request<Q, P, Req>(parse(this.query, query), parse(this.params, params), parse(this.requestBody, body))
+  parse({ query, params, body }: RawRequest): Request<Q, P, Req> {
+    return new Request<Q, P, Req>(
+      parse(this.query, query),
+      parse(this.params, params),
+      parse(this.requestBody, body ?? {}),
+    )
   }
 }
 
