@@ -1,18 +1,15 @@
 import { ZodStruct } from '../src'
 import { z } from 'zod'
+import { parse } from '@mumpitz/common'
 
 class BookDto extends ZodStruct({
   id: z.string().toLowerCase(),
   title: z.string(),
   date: z.string().or(z.number()).pipe(z.coerce.date()),
-}) {
-  get computed() {
-    return this.id.toUpperCase()
-  }
-}
+}) {}
 
 describe('ZodStruct', () => {
-  const book = BookDto.deserialize({
+  const book = parse(BookDto, {
     id: 'Hello',
     title: 'Blubb',
     date: '2024-01-01',

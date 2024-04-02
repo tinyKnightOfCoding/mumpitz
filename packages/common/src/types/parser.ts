@@ -13,9 +13,11 @@ export type ParseableType<O, T> = {
   parse: ParserFunction<O>
 }
 
-export type Parser<O> = ParserFunction<O> | ParserInterface<O> | ParseableType<unknown, O>
+export type Parser<O> = ParserFunction<O> | ParseableType<unknown, O> | ParserInterface<O>
 
-export function parse<O>(parser: Parser<O>, raw: Json): O {
+export function parse<O, T>(type: ParseableType<O, T>, raw: Json): T
+export function parse<O>(parser: Parser<O>, raw: Json): O
+export function parse(parser: Parser<unknown>, raw: Json): unknown {
   if (isParseableType(parser)) {
     const parsed = parser.parse(raw)
     return new parser(parsed)

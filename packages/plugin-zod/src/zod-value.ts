@@ -1,52 +1,24 @@
-import { JsonPrimitive, Serializable, serialize } from '@mumpitz/common'
-import { z, ZodEffects, ZodType } from 'zod'
+import { Json, Serializable, serialize } from '@mumpitz/common'
+import { z, ZodType } from 'zod'
 
-type ZodValueProp<
-  Z extends ZodType,
-  O = z.output<Z>,
-  I extends JsonPrimitive = z.input<Z>,
-  T extends ZodValueInstance<O> = ZodValueInstance<O>,
-> = ZodEffects<Z, T, I>
+type Output<Z extends ZodType> = z.output<Z>
 
-type ActualZodValueConstructor<
-  Z extends ZodType,
-  O = z.output<Z>,
-  T extends ZodValueInstance<O> = ZodValueInstance<O>,
-> = {
-  new (value: O): T
-
-  readonly schema: Z
-}
-
-export type ZodValueConstructor<Z extends ZodType, O = z.output<Z>, I extends JsonPrimitive = z.input<Z>> = {
-  new (value: O): ZodValueInstance<O>
+export type ZodValueType<Z extends ZodType> = {
+  new (value: Output<Z>): Serializable & { readonly value: Output<Z> }
 
   readonly schema: Z
 
-  prop<T extends ZodValueInstance<O>>(this: ActualZodValueConstructor<Z, O, T>): ZodValueProp<Z, O, I, T>
-
-  deserialize<T extends ZodValueInstance<O>>(this: ActualZodValueConstructor<Z, O, T>, data: JsonPrimitive): T
+  parse(raw: Json): Output<Z>
 }
 
-export type ZodValueInstance<O = unknown> = Serializable & { readonly value: O }
-
-export function ZodValue<Z extends ZodType, O = z.output<Z>, I extends JsonPrimitive = z.input<Z>>(
-  shape: Z,
-): ZodValueConstructor<Z, O, I> {
-  class _ZodValue implements ZodValueInstance<O> {
+export function ZodValue<Z extends ZodType>(shape: Z): ZodValueType<Z> {
+  class _ZodValue implements Serializable {
     static readonly schema = shape
 
-    constructor(readonly value: O) {}
+    constructor(readonly value: Output<Z>) {}
 
-    static prop<T extends ZodValueInstance<O>>(this: ActualZodValueConstructor<Z, O, T>): ZodValueProp<Z, O, I, T> {
-      return this.schema.transform(data => new this(data))
-    }
-
-    static deserialize<T extends ZodValueInstance<O>>(
-      this: ActualZodValueConstructor<Z, O, T>,
-      data: JsonPrimitive,
-    ): T {
-      return new this(this.schema.parse(data))
+    static parse(raw: Json): Output<Z> {
+      return this.schema.parse(raw)
     }
 
     toJSON() {
