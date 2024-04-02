@@ -2,7 +2,7 @@
   "name": "@mumpitz/plugin-zod",
   "version": "0.1.0",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/index",
   "module": "dist/index.mjs",
   "scripts": {
     "format": "prettier --check --write src test *.json",
