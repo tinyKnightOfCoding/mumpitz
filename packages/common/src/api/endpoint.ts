@@ -1,123 +1,123 @@
-import { Query, QueryDeserializer } from './query'
-import { Params, ParamsDeserializer } from './params'
-import { deserialize, Deserializer, EmptyObject, HttpMethod, HttpStatus } from '../types'
+import { Query } from './query'
+import { Params } from './params'
+import { EmptyObject, HttpMethod, HttpStatus, parse, Parser } from '../types'
 import { RawRequest, Request } from './request'
 
 export type EndpointOptions<Q extends Query, P extends Params, Req, Res> = {
   method: HttpMethod
   path: string
-  query?: QueryDeserializer<Q>
-  params?: ParamsDeserializer<P>
-  requestBody?: Deserializer<Req>
-  responseBody?: Deserializer<Res>
+  query?: Parser<Q>
+  params?: Parser<P>
+  requestBody?: Parser<Req>
+  responseBody?: Parser<Res>
   responseStatus?: HttpStatus
 }
 
 export function endpoint<Q extends Query, P extends Params, Req, Res>(options: {
   method: HttpMethod
   path: string
-  query: QueryDeserializer<Q>
-  params: ParamsDeserializer<P>
-  requestBody: Deserializer<Req>
-  responseBody: Deserializer<Res>
+  query: Parser<Q>
+  params: Parser<P>
+  requestBody: Parser<Req>
+  responseBody: Parser<Res>
   responseStatus?: HttpStatus
 }): Endpoint<Q, P, Req, Res>
 export function endpoint<P extends Params, Req, Res>(options: {
   method: HttpMethod
   path: string
-  params: ParamsDeserializer<P>
-  requestBody: Deserializer<Req>
-  responseBody: Deserializer<Res>
+  params: Parser<P>
+  requestBody: Parser<Req>
+  responseBody: Parser<Res>
   responseStatus?: HttpStatus
 }): Endpoint<EmptyObject, P, Req, Res>
 export function endpoint<Q extends Query, Req, Res>(options: {
   method: HttpMethod
   path: string
-  query: QueryDeserializer<Q>
-  requestBody: Deserializer<Req>
-  responseBody: Deserializer<Res>
+  query: Parser<Q>
+  requestBody: Parser<Req>
+  responseBody: Parser<Res>
   responseStatus?: HttpStatus
 }): Endpoint<Q, EmptyObject, Req, Res>
 export function endpoint<Q extends Query, P extends Params, Res>(options: {
   method: HttpMethod
-  query: QueryDeserializer<Q>
-  params: ParamsDeserializer<P>
-  responseBody: Deserializer<Res>
+  query: Parser<Q>
+  params: Parser<P>
+  responseBody: Parser<Res>
   path: string
   responseStatus?: HttpStatus
 }): Endpoint<Q, P, void, Res>
 export function endpoint<Q extends Query, P extends Params, Req>(options: {
   method: HttpMethod
   path: string
-  query: QueryDeserializer<Q>
-  params: ParamsDeserializer<P>
-  requestBody: Deserializer<Req>
+  query: Parser<Q>
+  params: Parser<P>
+  requestBody: Parser<Req>
   responseStatus?: HttpStatus
 }): Endpoint<Q, P, Req, void>
 export function endpoint<Req, Res>(options: {
   method: HttpMethod
   path: string
-  requestBody: Deserializer<Req>
-  responseBody: Deserializer<Res>
+  requestBody: Parser<Req>
+  responseBody: Parser<Res>
   responseStatus?: HttpStatus
 }): Endpoint<EmptyObject, EmptyObject, Req, Res>
 export function endpoint<P extends Params, Res>(options: {
   method: HttpMethod
   path: string
-  params: ParamsDeserializer<P>
-  responseBody: Deserializer<Res>
+  params: Parser<P>
+  responseBody: Parser<Res>
   responseStatus?: HttpStatus
 }): Endpoint<EmptyObject, P, void, Res>
 export function endpoint<P extends Params, Req>(options: {
   method: HttpMethod
   path: string
-  params: ParamsDeserializer<P>
-  requestBody: Deserializer<Req>
+  params: Parser<P>
+  requestBody: Parser<Req>
   responseStatus?: HttpStatus
 }): Endpoint<EmptyObject, P, Req, void>
 export function endpoint<Q extends Query, Res>(options: {
   method: HttpMethod
   path: string
-  query: QueryDeserializer<Q>
-  responseBody: Deserializer<Res>
+  query: Parser<Q>
+  responseBody: Parser<Res>
   responseStatus?: HttpStatus
 }): Endpoint<Q, EmptyObject, void, Res>
 export function endpoint<Q extends Query, Req>(options: {
   method: HttpMethod
   path: string
-  query: QueryDeserializer<Q>
-  requestBody: Deserializer<Req>
+  query: Parser<Q>
+  requestBody: Parser<Req>
   responseStatus?: HttpStatus
 }): Endpoint<Q, EmptyObject, Req, void>
 export function endpoint<Q extends Query, P extends Params>(options: {
   method: HttpMethod
   path: string
-  query: QueryDeserializer<Q>
-  params: ParamsDeserializer<P>
+  query: Parser<Q>
+  params: Parser<P>
   responseStatus?: HttpStatus
 }): Endpoint<Q, P, void, void>
 export function endpoint<Q extends Query>(options: {
   method: HttpMethod
   path: string
-  query: QueryDeserializer<Q>
+  query: Parser<Q>
   responseStatus?: HttpStatus
 }): Endpoint<Q, EmptyObject, void, void>
 export function endpoint<P extends Params>(options: {
   method: HttpMethod
   path: string
-  params: ParamsDeserializer<P>
+  params: Parser<P>
   responseStatus?: HttpStatus
 }): Endpoint<EmptyObject, P, void, void>
 export function endpoint<Req>(options: {
   method: HttpMethod
   path: string
-  requestBody: Deserializer<Req>
+  requestBody: Parser<Req>
   responseStatus?: HttpStatus
 }): Endpoint<EmptyObject, EmptyObject, Req, void>
 export function endpoint<Res>(options: {
   method: HttpMethod
   path: string
-  responseBody: Deserializer<Res>
+  responseBody: Parser<Res>
   responseStatus?: HttpStatus
 }): Endpoint<EmptyObject, EmptyObject, void, Res>
 export function endpoint(options: {
@@ -131,11 +131,11 @@ export function endpoint(
   return new Endpoint<Query, Params, unknown, unknown>(
     options.method,
     options.path,
-    options.query ?? emptyDeserializer,
-    options.params ?? emptyDeserializer,
-    options.requestBody ?? voidDeserializer,
+    options.query ?? emptyParser,
+    options.params ?? emptyParser,
+    options.requestBody ?? voidParser,
     options.responseStatus ?? 'ok',
-    options.responseBody ?? voidDeserializer,
+    options.responseBody ?? voidParser,
   )
 }
 
@@ -143,22 +143,18 @@ export class Endpoint<Q extends Query, P extends Params, Req, Res> {
   constructor(
     readonly method: HttpMethod,
     readonly path: string,
-    readonly query: QueryDeserializer<Q>,
-    readonly params: ParamsDeserializer<P>,
-    readonly requestBody: Deserializer<Req>,
+    readonly query: Parser<Q>,
+    readonly params: Parser<P>,
+    readonly requestBody: Parser<Req>,
     readonly responseStatus: HttpStatus,
-    readonly responseBody: Deserializer<Res>,
+    readonly responseBody: Parser<Res>,
   ) {}
 
   deserialize({ query, params, body }: RawRequest): Request<Q, P, Req> {
-    return new Request<Q, P, Req>(
-      deserialize(this.query, query),
-      deserialize(this.params, params),
-      deserialize(this.requestBody, body),
-    )
+    return new Request<Q, P, Req>(parse(this.query, query), parse(this.params, params), parse(this.requestBody, body))
   }
 }
 
-const emptyDeserializer: Deserializer<EmptyObject> = () => ({})
+const emptyParser: Parser<EmptyObject> = () => ({})
 
-const voidDeserializer: Deserializer<void> = () => {}
+const voidParser: Parser<void> = () => {}

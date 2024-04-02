@@ -1,13 +1,13 @@
-import { Deserializer, endpoint, Json, RawParams, RawQuery } from '../../src'
+import { endpoint, Json, Parser, RawParams, RawQuery } from '../../src'
 
 describe('Endpoint', () => {
   it('should deserialize request', () => {
     const aEndpoint = endpoint({
       method: 'GET',
       path: '/endpoints',
-      query: mockDeserializer({ query: 'Hello' }),
-      params: mockDeserializer({ params: 'Blubb' }),
-      requestBody: mockDeserializer({ body: 'World' }),
+      query: mockParser({ query: 'Hello' }),
+      params: mockParser({ params: 'Blubb' }),
+      requestBody: mockParser({ body: 'World' }),
     })
     const query: RawQuery = { raw: 'query' }
     const params: RawParams = { raw: 'params' }
@@ -22,7 +22,7 @@ describe('Endpoint', () => {
   })
 })
 
-function mockDeserializer<O = unknown, I extends Json = Json>(deserializedValue: O): Deserializer<O, I> {
+function mockParser<O = unknown>(deserializedValue: O): Parser<O> {
   const mock = jest.fn()
   mock.mockReturnValue(deserializedValue)
   return mock
