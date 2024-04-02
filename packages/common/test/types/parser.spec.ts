@@ -11,9 +11,7 @@ class MockParserInterface implements ParserInterface<string> {
 class MockParseableType {
   constructor(private value: string) {}
 
-  static parse(raw: Json): string {
-    return raw as string
-  }
+  static readonly schema = new MockParserInterface()
 }
 
 describe('parse', () => {

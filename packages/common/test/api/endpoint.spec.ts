@@ -3,7 +3,7 @@ import { endpoint, Json, Parser, RawParams, RawQuery } from '../../src'
 describe('Endpoint', () => {
   it('should deserialize request', () => {
     const aEndpoint = endpoint({
-      method: 'GET',
+      method: 'get',
       path: '/endpoints',
       query: mockParser({ query: 'Hello' }),
       params: mockParser({ params: 'Blubb' }),

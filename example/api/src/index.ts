@@ -1,11 +1,16 @@
 import { endpoint } from '@mumpitz/common'
-import { ZodStruct } from '@mumpitz/plugin-zod'
+import { prop, ZodStruct } from '@mumpitz/plugin-zod'
 import { z } from 'zod'
 
 const dateProp = () => z.string().or(z.number()).pipe(z.coerce.date())
 
 export class CreateTodoRequest extends ZodStruct({
   title: z.string(),
+}) {}
+
+export class UpdateTodoRequest extends ZodStruct({
+  title: z.string(),
+  isDone: z.boolean(),
 }) {}
 
 export class TodoDto extends ZodStruct({
@@ -16,14 +21,55 @@ export class TodoDto extends ZodStruct({
   updatedAt: dateProp(),
 }) {}
 
-const createTodo = endpoint({
-  method: 'POST',
+const create = endpoint({
+  method: 'post',
   path: '/todos',
   requestBody: CreateTodoRequest,
   responseStatus: 'created',
   responseBody: TodoDto,
 })
 
+const deleteById = endpoint({
+  method: 'delete',
+  path: '/todos/:id',
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  responseStatus: 'noContent',
+})
+
+const updateById = endpoint({
+  method: 'put',
+  path: '/todos/:id',
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  requestBody: UpdateTodoRequest,
+  responseBody: TodoDto,
+})
+
+const getAll = endpoint({
+  method: 'get',
+  path: '/todos',
+  query: z.object({
+    isDone: z.boolean().optional(),
+  }),
+  responseBody: prop(TodoDto).array(),
+})
+
+const getById = endpoint({
+  method: 'get',
+  path: '/todos/:id',
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  responseBody: TodoDto,
+})
+
 export const todoEndpoints = {
-  createTodo,
+  create,
+  deleteById,
+  updateById,
+  getAll,
+  getById,
 }

@@ -8,33 +8,35 @@ export type ParserInterface<O> = {
   parse: ParserFunction<O>
 }
 
-export type ParseableType<O, T> = {
-  new (value: O): T
-  parse: ParserFunction<O>
+export type ParseableType<O> = {
+  new (value: never): O
+  schema: ParserInterface<unknown>
 }
 
-export type Parser<O> = ParserFunction<O> | ParseableType<unknown, O> | ParserInterface<O>
+export type Parser<O> = ParserFunction<O> | ParseableType<O> | ParserInterface<O>
 
-export function parse<O, T>(type: ParseableType<O, T>, raw: Json): T
-export function parse<O>(parser: Parser<O>, raw: Json): O
-export function parse(parser: Parser<unknown>, raw: Json): unknown {
+export function parse<O>(parser: Parser<O>, raw: Json): O {
   if (isParseableType(parser)) {
-    const parsed = parser.parse(raw)
-    return new parser(parsed)
+    const parsed = parser.schema.parse(raw)
+    return new parser(parsed as never)
   } else if (isParserInterface(parser)) {
     return parser.parse(raw)
   }
   return parser(raw)
 }
 
-function isParseableType<O>(parser: Parser<O>): parser is ParseableType<unknown, O> {
-  return isConstructor(parser) && isParserInterface(parser)
+function isParseableType<O>(parser: Parser<O>): parser is ParseableType<O> {
+  return (
+    isConstructor(parser) &&
+    isDefined((parser as ParseableType<unknown>).schema) &&
+    isParserInterface((parser as ParseableType<unknown>).schema)
+  )
 }
 
 function isParserInterface<O>(parser: Parser<O>): parser is ParserInterface<O> {
   return (
     isDefined((parser as ParserInterface<unknown>).parse) &&
     typeof (parser as ParserInterface<unknown>).parse === 'function' &&
-    (parser as ParserInterface<unknown>).parse.length === 1
+    (parser as ParserInterface<unknown>).parse.length >= 1
   )
 }

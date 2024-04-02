@@ -1,5 +1,6 @@
 import { ZodStruct } from '../src'
 import { z } from 'zod'
+import { expectType, TypeEqual } from 'ts-expect'
 import { parse } from '@mumpitz/common'
 
 class BookDto extends ZodStruct({
@@ -13,6 +14,11 @@ describe('ZodStruct', () => {
     id: 'Hello',
     title: 'Blubb',
     date: '2024-01-01',
+  })
+
+  it('should infer type', () => {
+    expect(book.constructor.name).toEqual('BookDto')
+    expectType<TypeEqual<BookDto, typeof book>>(true)
   })
 
   it('should deserialize', () => {
