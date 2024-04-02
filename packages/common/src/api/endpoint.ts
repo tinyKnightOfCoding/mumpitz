@@ -139,7 +139,7 @@ export function endpoint(
   )
 }
 
-export class Endpoint<Q extends Query, P extends Params, Req, Res> {
+export class Endpoint<Q extends Query = Query, P extends Params = Params, Req = unknown, Res = unknown> {
   constructor(
     readonly method: HttpMethod,
     readonly path: string,
