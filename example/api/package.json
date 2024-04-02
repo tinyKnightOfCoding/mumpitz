@@ -22,6 +22,7 @@
   "devDependencies": {
     "@mumpitz/common": "file:../../packages/common",
     "@mumpitz/plugin-zod": "file:../../packages/plugin-zod",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "ts-expect": "^1.3.0"
   }
 }
