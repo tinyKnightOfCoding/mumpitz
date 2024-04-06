@@ -8,5 +8,8 @@
         "useESM": true
       }
     ]
+  },
+  "testEnvironmentOptions": {
+    "nodeOptions": "--experimental-vm-modules"
   }
 }

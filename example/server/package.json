@@ -6,8 +6,8 @@
   "scripts": {
     "format": "prettier --check --write src test *.json",
     "lint": "eslint . --ext .ts --fix",
-    "test": "jest",
-    "build": "tsc -p tsconfig.build.json",
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+    "build": "tsc --project tsconfig.build.json",
     "start": "tsx --tsconfig tsconfig.build.json ./src/app.ts",
     "dev": "tsx watch --tsconfig tsconfig.build.json ./src/app.ts"
   },

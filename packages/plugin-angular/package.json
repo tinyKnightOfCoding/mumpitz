@@ -1,5 +1,5 @@
 {
-  "name": "@mumpitz/plugin-zod",
+  "name": "@mumpitz/plugin-angular",
   "version": "0.1.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,12 +12,11 @@
   },
   "peerDependencies": {
     "@mumpitz/common": "file:../common",
-    "zod": "^3.22.4"
+    "@angular/common": "^17.3.3"
   },
   "devDependencies": {
     "@mumpitz/common": "file:../common",
-    "ts-expect": "^1.3.0",
-    "zod": "^3.22.4"
+    "@angular/common": "^17.3.3"
   },
   "files": [
     "src",

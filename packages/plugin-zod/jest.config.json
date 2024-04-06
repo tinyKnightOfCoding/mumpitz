@@ -1,7 +1,12 @@
 {
-  "preset": "ts-jest",
+  "preset": "ts-jest/presets/default-esm",
   "roots": ["<rootDir>/test"],
   "transform": {
-    "^.//+.tsx?$": "ts-jest"
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        "useESM": true
+      }
+    ]
   }
 }

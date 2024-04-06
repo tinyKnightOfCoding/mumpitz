@@ -1,4 +1,4 @@
-import { DynamicController, Endpoints, EndpointsProvider } from '../src'
+import { DynamicController, Endpoints, EndpointsProvider, ProviderFunction } from '../src'
 import { Controller, Injectable, RequestMethod } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
@@ -6,6 +6,7 @@ import { HTTP_CODE_METADATA, METHOD_METADATA, PATH_METADATA, ROUTE_ARGS_METADATA
 import { endpoint, Request } from '@mumpitz/common'
 import { z } from 'zod'
 import { prop, ZodStruct } from '@mumpitz/plugin-zod/src'
+import { jest } from '@jest/globals'
 
 class BlogDto extends ZodStruct({
   id: z.string().optional(),
@@ -82,9 +83,9 @@ describe('DynamicController', () => {
 
   describe('nestjs', () => {
     const blogProvider: EndpointsProvider<BlogEndpoints> = {
-      getBlogs: jest.fn(),
-      getBlogById: jest.fn(),
-      createBlog: jest.fn(),
+      getBlogs: jest.fn<ProviderFunction<typeof getBlogs>>(),
+      getBlogById: jest.fn<ProviderFunction<typeof getBlogById>>(),
+      createBlog: jest.fn<ProviderFunction<typeof createBlog>>(),
     }
     let app: NestFastifyApplication
 

@@ -1,4 +1,5 @@
-import { endpoint, Json, Parser, RawParams, RawQuery } from '../../src'
+import { endpoint, Json, Parser, ParserFunction, RawParams, RawQuery } from '../../src'
+import { jest } from '@jest/globals'
 
 describe('Endpoint', () => {
   it('should parse request', () => {
@@ -23,7 +24,7 @@ describe('Endpoint', () => {
 })
 
 function mockParser<O = unknown>(deserializedValue: O): Parser<O> {
-  const mock = jest.fn()
+  const mock = jest.fn<ParserFunction<O>>()
   mock.mockReturnValue(deserializedValue)
   return mock
 }

@@ -2,13 +2,13 @@
   "name": "@mumpitz/plugin-nestjs",
   "version": "0.0.1",
   "main": "dist/index.js",
-  "types": "dist/index",
-  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "format": "prettier --check --write src test *.json",
     "lint": "eslint . --ext .ts --fix",
-    "test": "jest",
-    "build": "tsup"
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+    "build": "tsc --project tsconfig.build.json"
   },
   "files": [
     "src",
