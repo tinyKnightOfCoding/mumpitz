@@ -35,19 +35,19 @@ export function Client<E extends Endpoints>(endpoints: E): ClientConstructor<E> 
 function createEndpointFunction<Q extends Query = Query, P extends Params = Params, Req = unknown, Res = unknown>(
   endpoint: Endpoint<Q, P, Req, Res>,
 ): EndpointClient<Q, P, Req, Res> & ThisType<ClientThis> {
-  function handle(this: ClientThis, request: Request<Q, P, Req>): Observable<Res> {
+  return function handle(this: ClientThis, request: Request<Q, P, Req>): Observable<Res> {
     return this.http.request<Res>(endpoint.method, toPath(endpoint.path, this.baseUrl, request.params), {
       responseType: 'json',
       observe: 'body',
       body: request.body,
+      params: request.query,
     })
   }
-  return handle
 }
 
 function toPath<P extends Params>(path: string, baseUrl: string, params: P): string {
   const replacedPath = Object.entries(params).reduce(replaceParam, path)
-  return `${baseUrl}/${replacedPath}`
+  return `${baseUrl}/${replacedPath}`.replaceAll(/\/+/g, '/')
 }
 
 function replaceParam(path: string, [paramName, paramValue]: [string, JsonPrimitive]): string {

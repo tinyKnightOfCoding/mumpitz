@@ -16,7 +16,9 @@
   },
   "devDependencies": {
     "@mumpitz/common": "file:../common",
-    "@angular/common": "^17.3.3"
+    "@angular/common": "^17.3.3",
+    "@mumpitz/plugin-zod": "file:../plugin-zod",
+    "zod": "^3.22.4"
   },
   "files": [
     "src",
