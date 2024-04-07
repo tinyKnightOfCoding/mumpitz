@@ -25,7 +25,9 @@
     "@nestjs/platform-fastify": "^10.3.4",
     "@mumpitz/common": "file:../../packages/common",
     "@mumpitz/plugin-zod": "file:../../packages/plugin-zod",
+    "@mumpitz/plugin-nestjs": "file:../../packages/plugin-nestjs",
     "@mumpitz/example-api": "file:../api",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "uuidv7": "^0.6.3"
   }
 }
