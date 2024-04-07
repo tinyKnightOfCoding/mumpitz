@@ -8,7 +8,8 @@
     "build": "lerna run build",
     "test": "lerna run test",
     "watch": "lerna watch -- lerna run build --scope=\\$LERNA_PACKAGE_NAME --include-dependents",
-    "server": "npm run start -w example/server"
+    "server": "npm run start -w example/server",
+    "web": "npm run start -w example/web"
   },
   "workspaces": [
     "packages/*",
