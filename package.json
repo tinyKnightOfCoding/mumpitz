@@ -1,6 +1,7 @@
 {
   "name": "mumpitz",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "prepare": "husky",
     "format": "lerna run format",
