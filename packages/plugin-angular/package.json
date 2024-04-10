@@ -1,7 +1,7 @@
 {
   "name": "@mumpitz/plugin-angular",
   "license": "MIT",
-  "version": "0.2.0",
+  "version": "0.1.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -12,12 +12,12 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "peerDependencies": {
-    "@mumpitz/common": "file:../common",
-    "@angular/common": "^17.3.3"
+    "@angular/common": "^17.3.3",
+    "@mumpitz/common": "file:../common"
   },
   "devDependencies": {
-    "@mumpitz/common": "file:../common",
     "@angular/common": "^17.3.3",
+    "@mumpitz/common": "file:../common",
     "@mumpitz/plugin-zod": "file:../plugin-zod",
     "zod": "^3.22.4"
   },
