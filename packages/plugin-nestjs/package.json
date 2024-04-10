@@ -1,7 +1,7 @@
 {
   "name": "@mumpitz/plugin-nestjs",
   "license": "MIT",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -17,8 +17,8 @@
     "Readme.md"
   ],
   "devDependencies": {
-    "@mumpitz/common": "^0.1.2",
-    "@mumpitz/plugin-zod": "^0.1.2",
+    "@mumpitz/common": "^0.1.3",
+    "@mumpitz/plugin-zod": "^0.1.3",
     "@nestjs/core": "^10.3.3",
     "@nestjs/platform-fastify": "^10.3.3",
     "@nestjs/testing": "^10.3.3",
