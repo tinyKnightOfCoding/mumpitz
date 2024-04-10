@@ -13,11 +13,11 @@
   },
   "peerDependencies": {
     "@angular/common": "^17.3.3",
-    "@mumpitz/common": "0.1.1"
+    "@mumpitz/common": "^0.1.2"
   },
   "devDependencies": {
     "@angular/common": "^17.3.3",
-    "@mumpitz/common": "0.1.1",
+    "@mumpitz/common": "^0.1.2",
     "@mumpitz/plugin-zod": "^0.1.2",
     "zod": "^3.22.4"
   },
