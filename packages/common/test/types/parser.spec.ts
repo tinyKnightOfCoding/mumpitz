@@ -1,10 +1,10 @@
 import { Json, parse, ParserInterface } from '../../src'
 import { jest } from '@jest/globals'
 
-const parserFunction = jest.fn((raw: Json) => raw as string)
+const parserFunction = jest.fn((raw: Json | undefined) => raw as string)
 
 class MockParserInterface implements ParserInterface<string> {
-  parse(raw: Json): string {
+  parse(raw: Json | undefined): string {
     return raw as string
   }
 }

@@ -2,7 +2,7 @@ import { Json } from './json'
 import { isConstructor } from './constructor'
 import { isDefined } from './defined'
 
-export type ParserFunction<O> = (raw: Json) => O
+export type ParserFunction<O> = (raw: Json | undefined) => O
 
 export type ParserInterface<O> = {
   parse: ParserFunction<O>
@@ -13,9 +13,9 @@ export type ParseableType<O> = {
   schema: ParserInterface<unknown>
 }
 
-export type Parser<O> = ParserFunction<O> | ParseableType<O> | ParserInterface<O>
+export type Parser<O = unknown> = ParserFunction<O> | ParseableType<O> | ParserInterface<O>
 
-export function parse<O>(parser: Parser<O>, raw: Json): O {
+export function parse<O>(parser: Parser<O>, raw: Json | undefined): O {
   if (isParseableType(parser)) {
     const parsed = parser.schema.parse(raw)
     return new parser(parsed as never)

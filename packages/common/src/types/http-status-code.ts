@@ -67,3 +67,7 @@ export const httpStatusCodes = {
 export type HttpStatus = keyof typeof httpStatusCodes
 
 export type HttpStatusCode = (typeof httpStatusCodes)[HttpStatus]
+
+export function httpStatusForCode(code: HttpStatusCode): HttpStatus {
+  return Object.keys(httpStatusCodes).find(key => httpStatusCodes[key as HttpStatus] === code) as HttpStatus
+}
