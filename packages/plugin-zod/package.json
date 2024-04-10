@@ -1,7 +1,7 @@
 {
   "name": "@mumpitz/plugin-zod",
   "license": "MIT",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -12,7 +12,7 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "@mumpitz/common": "^0.1.4",
+    "@mumpitz/common": "^0.1.5",
     "zod": "^3.22.4"
   },
   "devDependencies": {

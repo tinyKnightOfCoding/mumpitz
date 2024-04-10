@@ -1,7 +1,7 @@
 {
   "name": "@mumpitz/plugin-angular",
   "license": "MIT",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "@angular/common": "^17.3.3",
-    "@mumpitz/common": "^0.1.4"
+    "@mumpitz/common": "^0.1.5"
   },
   "devDependencies": {
-    "@mumpitz/plugin-zod": "^0.1.4"
+    "@mumpitz/plugin-zod": "^0.1.5"
   },
   "files": [
     "src",
