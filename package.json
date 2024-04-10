@@ -11,7 +11,8 @@
     "watch": "lerna watch -- lerna run build --scope=\\$LERNA_PACKAGE_NAME --include-dependents",
     "server": "npm run start -w example/server",
     "web": "npm run start -w example/web",
-    "publish": "lerna publish --no-private"
+    "version": "lerna version --no-private --force-publish",
+    "publish": "lerna publish from-git"
   },
   "workspaces": [
     "packages/*",
