@@ -10,7 +10,8 @@
     "test": "lerna run test",
     "watch": "lerna watch -- lerna run build --scope=\\$LERNA_PACKAGE_NAME --include-dependents",
     "server": "npm run start -w example/server",
-    "web": "npm run start -w example/web"
+    "web": "npm run start -w example/web",
+    "publish": "lerna publish --no-private"
   },
   "workspaces": [
     "packages/*",
