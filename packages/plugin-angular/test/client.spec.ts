@@ -7,24 +7,36 @@ import { z } from 'zod'
 import { jest } from '@jest/globals'
 import { HttpClient } from '@angular/common/http'
 
+const noBody = () => {}
+
 class BlogDto extends ZodStruct({
   id: z.string().optional(),
   title: z.string(),
   version: z.number(),
 }) {}
 
-const getBlogs = endpoint({ method: 'get', path: '/blogs', responseBody: prop(BlogDto).array() })
+const getBlogs = endpoint({
+  method: 'get',
+  path: '/blogs',
+  responses: {
+    ok: prop(BlogDto).array(),
+  },
+})
 const getBlogById = endpoint({
   method: 'get',
   path: '/blogs/:id',
   params: z.object({ id: z.string() }),
-  responseBody: BlogDto,
+  responses: {
+    ok: BlogDto,
+  },
 })
 const createBlog = endpoint({
   method: 'post',
   path: '/blogs',
   requestBody: BlogDto,
-  responseStatus: 'created',
+  responses: {
+    created: noBody,
+  },
 })
 
 class MockHttpClient {

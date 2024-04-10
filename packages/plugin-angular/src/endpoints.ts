@@ -1,10 +1,15 @@
-import { Endpoint, Params, Query, Request } from '@mumpitz/common'
+import { Endpoint, Params, Query, Request, Responses, UnknownResponse } from '@mumpitz/common'
 import { Observable } from 'rxjs'
 
 export type Endpoints = Record<string, Endpoint>
 
-export type EndpointClient<Q extends Query = Query, P extends Params = Params, Req = unknown, Res = unknown> = {
-  (request: Request<Q, P, Req>): Observable<Res>
+export type EndpointClient<
+  Q extends Query = Query,
+  P extends Params = Params,
+  Req = unknown,
+  Res extends Responses = Responses,
+> = {
+  (request: Request<Q, P, Req>): Observable<Res[keyof Res] | UnknownResponse>
 }
 
 export type ClientFunction<E extends Endpoint> =

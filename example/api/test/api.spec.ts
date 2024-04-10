@@ -4,8 +4,9 @@ import { EmptyObject, Endpoint } from '@mumpitz/common'
 
 describe('API', () => {
   it('should infer class types', () => {
+    type CreateTodoEndpoint = (typeof todoEndpoints)['create']
     expectType<
-      TypeEqual<(typeof todoEndpoints)['create'], Endpoint<EmptyObject, EmptyObject, CreateTodoRequest, TodoDto>>
+      TypeEqual<CreateTodoEndpoint, Endpoint<EmptyObject, EmptyObject, CreateTodoRequest, { created: TodoDto }>>
     >(true)
   })
 })

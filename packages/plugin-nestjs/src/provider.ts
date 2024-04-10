@@ -1,10 +1,40 @@
-import { Endpoint, Params, Query, Request } from '@mumpitz/common'
-import { Observable } from 'rxjs'
+import {
+  Endpoint,
+  HttpStatus,
+  HttpStatusCode,
+  httpStatusCodes,
+  Params,
+  Query,
+  Request,
+  Responses,
+} from '@mumpitz/common'
 
 export type Endpoints = Record<string, Endpoint>
 
-export type EndpointProvider<Q extends Query = Query, P extends Params = Params, Req = unknown, Res = unknown> = {
-  (request: Request<Q, P, Req>): Promise<Res> | Observable<Res>
+export class ProviderResponse<H extends HttpStatus, R> {
+  constructor(
+    readonly httpStatus: H,
+    readonly body: R,
+  ) {}
+
+  get statusCode(): HttpStatusCode {
+    return httpStatusCodes[this.httpStatus]
+  }
+}
+
+export type ProviderResponses<R extends Responses> = NonNullable<
+  {
+    [K in keyof R]?: K extends HttpStatus ? ProviderResponse<K, R[K]> : never
+  }[keyof R]
+>
+
+export type EndpointProvider<
+  Q extends Query = Query,
+  P extends Params = Params,
+  Req = unknown,
+  Res extends Responses = Responses,
+> = {
+  (request: Request<Q, P, Req>): Promise<ProviderResponses<Res>>
 }
 
 export type ProviderFunction<E extends Endpoint> =

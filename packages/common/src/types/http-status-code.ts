@@ -1,3 +1,5 @@
+import { isDefined } from './defined'
+
 export const httpStatusCodes = {
   continue: 100,
   switchingProtocols: 101,
@@ -70,4 +72,8 @@ export type HttpStatusCode = (typeof httpStatusCodes)[HttpStatus]
 
 export function httpStatusForCode(code: HttpStatusCode): HttpStatus {
   return Object.keys(httpStatusCodes).find(key => httpStatusCodes[key as HttpStatus] === code) as HttpStatus
+}
+
+export function isHttpStatusCode(value: number): value is HttpStatusCode {
+  return isDefined(value) && Object.values(httpStatusCodes).includes(value as HttpStatusCode)
 }

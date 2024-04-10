@@ -4,6 +4,8 @@ import { z } from 'zod'
 
 const dateProp = () => z.string().or(z.number()).pipe(z.coerce.date())
 
+const noBody = () => {}
+
 export class CreateTodoRequest extends ZodStruct({
   title: z.string(),
 }) {}
@@ -25,8 +27,9 @@ const create = endpoint({
   method: 'post',
   path: '/todos',
   requestBody: CreateTodoRequest,
-  responseStatus: 'created',
-  responseBody: TodoDto,
+  responses: {
+    created: TodoDto,
+  },
 })
 
 const deleteById = endpoint({
@@ -35,7 +38,9 @@ const deleteById = endpoint({
   params: z.object({
     id: z.string().uuid(),
   }),
-  responseStatus: 'noContent',
+  responses: {
+    noContent: noBody,
+  },
 })
 
 const updateById = endpoint({
@@ -45,7 +50,10 @@ const updateById = endpoint({
     id: z.string().uuid(),
   }),
   requestBody: UpdateTodoRequest,
-  responseBody: TodoDto,
+  responses: {
+    ok: TodoDto,
+    notFound: noBody,
+  },
 })
 
 const getAll = endpoint({
@@ -54,7 +62,9 @@ const getAll = endpoint({
   query: z.object({
     isDone: z.boolean().optional(),
   }),
-  responseBody: prop(TodoDto).array(),
+  responses: {
+    ok: prop(TodoDto).array(),
+  },
 })
 
 const getById = endpoint({
@@ -63,7 +73,10 @@ const getById = endpoint({
   params: z.object({
     id: z.string().uuid(),
   }),
-  responseBody: TodoDto,
+  responses: {
+    ok: TodoDto,
+    notFound: noBody,
+  },
 })
 
 export const todoEndpoints = {
@@ -72,4 +85,4 @@ export const todoEndpoints = {
   updateById,
   getAll,
   getById,
-}
+} as const

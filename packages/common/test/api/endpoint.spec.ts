@@ -9,11 +9,14 @@ describe('Endpoint', () => {
       query: mockParser({ query: 'Hello' }),
       params: mockParser({ params: 'Blubb' }),
       requestBody: mockParser({ body: 'World' }),
+      responses: {
+        ok: jest.fn(),
+      },
     })
     const query: RawQuery = { raw: 'query' }
     const params: RawParams = { raw: 'params' }
     const body: Json = { raw: 'body' }
-    const result = aEndpoint.parse({ query, params, body })
+    const result = aEndpoint.parseRequest({ query, params, body })
     expect(result.query).toEqual({ query: 'Hello' })
     expect(result.params).toEqual({ params: 'Blubb' })
     expect(result.body).toEqual({ body: 'World' })

@@ -1,12 +1,14 @@
-import { DynamicController, Endpoints, EndpointsProvider, ProviderFunction } from '../src'
+import { DynamicController, Endpoints, EndpointsProvider, ProviderResponse } from '../src'
 import { Controller, Injectable, RequestMethod } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
-import { HTTP_CODE_METADATA, METHOD_METADATA, PATH_METADATA, ROUTE_ARGS_METADATA } from '@nestjs/common/constants'
+import { METHOD_METADATA, PATH_METADATA, ROUTE_ARGS_METADATA } from '@nestjs/common/constants'
 import { endpoint, Request } from '@mumpitz/common'
 import { z } from 'zod'
 import { prop, ZodStruct } from '@mumpitz/plugin-zod/src'
 import { jest } from '@jest/globals'
+
+const noBody = () => {}
 
 class BlogDto extends ZodStruct({
   id: z.string().optional(),
@@ -14,18 +16,28 @@ class BlogDto extends ZodStruct({
   version: z.number(),
 }) {}
 
-const getBlogs = endpoint({ method: 'get', path: '/blogs', responseBody: prop(BlogDto).array() })
+const getBlogs = endpoint({
+  method: 'get',
+  path: '/blogs',
+  responses: {
+    ok: prop(BlogDto).array(),
+  },
+})
 const getBlogById = endpoint({
   method: 'get',
   path: '/blogs/:id',
   params: z.object({ id: z.string() }),
-  responseBody: BlogDto,
+  responses: {
+    ok: BlogDto,
+  },
 })
 const createBlog = endpoint({
   method: 'post',
   path: '/blogs',
   requestBody: BlogDto,
-  responseStatus: 'created',
+  responses: {
+    created: noBody,
+  },
 })
 
 const blogEndpoints = { getBlogs, getBlogById, createBlog } satisfies Endpoints
@@ -34,22 +46,25 @@ type BlogEndpoints = typeof blogEndpoints
 
 @Injectable()
 class NoopBlogProvider implements EndpointsProvider<BlogEndpoints> {
-  getBlogById(): Promise<BlogDto> {
+  getBlogById(): Promise<ProviderResponse<'ok', BlogDto>> {
     return Promise.resolve(
-      new BlogDto({
-        id: 'SomeId',
-        title: 'The title',
-        version: 5,
-      }),
+      new ProviderResponse(
+        'ok',
+        new BlogDto({
+          id: 'SomeId',
+          title: 'The title',
+          version: 5,
+        }),
+      ),
     )
   }
 
-  getBlogs(): Promise<BlogDto[]> {
-    return Promise.resolve([])
+  getBlogs(): Promise<ProviderResponse<'ok', BlogDto[]>> {
+    return Promise.resolve(new ProviderResponse('ok', []))
   }
 
-  createBlog(): Promise<void> {
-    return Promise.resolve()
+  createBlog(): Promise<ProviderResponse<'created', void>> {
+    return Promise.resolve(new ProviderResponse('created', undefined))
   }
 }
 
@@ -64,11 +79,7 @@ describe('DynamicController', () => {
   it('should have metadata keys', () => {
     expect(Reflect.getMetadataKeys(BlogController.prototype.constructor, 'getBlogs')).toEqual([ROUTE_ARGS_METADATA])
     expect(BlogController.prototype.getBlogs).toBeDefined()
-    expect(Reflect.getMetadataKeys(BlogController.prototype.getBlogs)).toEqual([
-      HTTP_CODE_METADATA,
-      PATH_METADATA,
-      METHOD_METADATA,
-    ])
+    expect(Reflect.getMetadataKeys(BlogController.prototype.getBlogs)).toEqual([PATH_METADATA, METHOD_METADATA])
   })
 
   it('getBlogById', () => {
@@ -82,24 +93,23 @@ describe('DynamicController', () => {
   })
 
   describe('nestjs', () => {
-    const blogProvider: EndpointsProvider<BlogEndpoints> = {
-      getBlogs: jest.fn<ProviderFunction<typeof getBlogs>>(),
-      getBlogById: jest.fn<ProviderFunction<typeof getBlogById>>(),
-      createBlog: jest.fn<ProviderFunction<typeof createBlog>>(),
-    }
+    const blogProvider = new NoopBlogProvider()
     let app: NestFastifyApplication
 
     beforeAll(async () => {
       const moduleRef = await Test.createTestingModule({
         controllers: [BlogController],
-        providers: [NoopBlogProvider],
-      })
-        .overrideProvider(NoopBlogProvider)
-        .useValue(blogProvider)
-        .compile()
+        providers: [{ useValue: blogProvider, provide: NoopBlogProvider }],
+      }).compile()
       app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
       await app.init()
       await app.getHttpAdapter().getInstance().ready()
+    })
+
+    beforeEach(() => {
+      jest.spyOn(blogProvider, 'getBlogs')
+      jest.spyOn(blogProvider, 'getBlogById')
+      jest.spyOn(blogProvider, 'createBlog')
     })
 
     it('getBlogs', async () => {

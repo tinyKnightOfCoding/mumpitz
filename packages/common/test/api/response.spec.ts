@@ -1,4 +1,4 @@
-import { InferResponse, parseResponse, ResponseParser, UnknownResponse } from '../../src'
+import { parseResponse, ResponseParser, UnknownResponse } from '../../src'
 import { expectType, TypeEqual } from 'ts-expect'
 
 describe('Response', () => {
@@ -11,7 +11,7 @@ describe('Response', () => {
   } satisfies ResponseParser
 
   it('should return union of parsers', () => {
-    type ParsedResponse = InferResponse<typeof responseParser>
+    type ParsedResponse = typeof responseParser extends ResponseParser<infer R> ? R[keyof R] : never
     expectType<TypeEqual<ParsedResponse, string | number>>(true)
   })
 
