@@ -1,7 +1,7 @@
 {
   "name": "@mumpitz/plugin-angular",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -23,6 +23,15 @@
   },
   "files": [
     "src",
-    "dist"
-  ]
+    "dist",
+    "Readme.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tinyKnightOfCoding/mumpitz.git",
+    "directory": "packages/common"
+  }
 }

@@ -1,7 +1,7 @@
 {
   "name": "@mumpitz/plugin-nestjs",
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -13,7 +13,8 @@
   },
   "files": [
     "src",
-    "dist"
+    "dist",
+    "Readme.md"
   ],
   "devDependencies": {
     "@mumpitz/common": "file:../common",
@@ -34,5 +35,13 @@
     "@mumpitz/common": "file:../common",
     "@nestjs/common": "^10.3.3",
     "rxjs": "^7.8.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tinyKnightOfCoding/mumpitz.git",
+    "directory": "packages/common"
   }
 }

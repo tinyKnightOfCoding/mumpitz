@@ -13,9 +13,18 @@
   },
   "files": [
     "src",
-    "dist"
+    "dist",
+    "Readme.md"
   ],
   "devDependencies": {
     "ts-expect": "^1.3.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tinyKnightOfCoding/mumpitz.git",
+    "directory": "packages/common"
   }
 }

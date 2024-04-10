@@ -22,6 +22,15 @@
   },
   "files": [
     "src",
-    "dist"
-  ]
+    "dist",
+    "Readme.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tinyKnightOfCoding/mumpitz.git",
+    "directory": "packages/common"
+  }
 }
