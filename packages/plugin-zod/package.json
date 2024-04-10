@@ -12,11 +12,11 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "peerDependencies": {
-    "@mumpitz/common": "file:../common",
+    "@mumpitz/common": "0.1.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@mumpitz/common": "file:../common",
+    "@mumpitz/common": "0.1.1",
     "ts-expect": "^1.3.0",
     "zod": "^3.22.4"
   },
