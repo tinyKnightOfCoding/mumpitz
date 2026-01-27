@@ -6,6 +6,10 @@ export type BaseBinding<T extends Defined> = {
   destroyed: () => Promise<void>
 }
 
+type HasDestroyed = {
+  destroyed: () => Promise<void>
+}
+
 export type RootBinding<T extends Defined> = BaseBinding<T> & {
   addDependent: (dependent: RootBinding<Defined>) => void
   destroy: () => Promise<T>
@@ -21,7 +25,7 @@ export class Binding<T extends Defined = Defined, TDestroyParams extends unknown
   private readonly destroyCallback: ((value: T, ...args: TDestroyParams) => Awaitable<void>) | undefined
   private readonly _destroyed: Deferred<void> = deferred()
   private isDestroyed = false
-  private readonly dependents: Binding<never, never>[] = []
+  private readonly dependents: HasDestroyed[] = []
 
   constructor(value: Promise<T>, destroyCallback?: (value: T, ...args: TDestroyParams) => Awaitable<void>) {
     this.value = value
@@ -33,7 +37,7 @@ export class Binding<T extends Defined = Defined, TDestroyParams extends unknown
     return this.value
   }
 
-  readonly addDependent = (dependent: Binding<never, TDestroyParams>): void => {
+  readonly addDependent = (dependent: HasDestroyed): void => {
     this.assertNotDestroyed()
     this.dependents.push(dependent)
   }
@@ -42,11 +46,11 @@ export class Binding<T extends Defined = Defined, TDestroyParams extends unknown
 
   readonly destroy = once(async (...args: TDestroyParams) => {
     try {
+      const value = await this.value
       this.isDestroyed = true
       await Promise.all(this.dependents.map((dependent) => dependent.destroyed()))
-      const value = await this.get()
       await this.destroyCallback?.(value, ...args)
-    } catch (error) {
+    } catch (_error) {
       // TODO figure out error handling
     } finally {
       this._destroyed.resolve()

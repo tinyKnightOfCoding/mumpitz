@@ -3,7 +3,7 @@ import { isDefined } from '@/types/defined'
 type Callback<TResult = unknown, TParams extends unknown[] = []> = (...args: TParams) => TResult
 
 export function once<TParams extends unknown[] = [], TResult = unknown>(
-  callback: Callback<TResult, TParams>
+  callback: Callback<TResult, TParams>,
 ): Callback<TResult, TParams> {
   let capture: { result: TResult } | { error: unknown } | undefined
   return (...args: TParams) => {
