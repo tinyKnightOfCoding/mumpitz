@@ -1,4 +1,4 @@
-name: Check Pull Request
+name: Check (@mumpitz/di)
 on:
   push:
     branches:
@@ -9,9 +9,11 @@ on:
 concurrency:
   group: push-${{ github.ref }}
   cancel-in-progress: true
+env:
+  WORKING_DIR: "./di"
 defaults:
   run:
-    working-directory: di
+    working-directory: "./di"
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -21,21 +23,24 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: setup pnpm
+      - name: install pnpm
         uses: pnpm/action-setup@v4
-      - name: setup node
+        with:
+          package_json_file: "${{ env.WORKING_DIR }}/package.json"
+          cache: true
+      - name: install node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
-          cache-dependency-path: pnpm-lock.yaml
-          cache: pnpm
+          node-version-file: "${{ env.WORKING_DIR }}/.nvmrc"
+          cache-dependency-path: "${{ env.WORKING_DIR }}/pnpm-lock.yaml"
+          cache: "pnpm"
       - name: install dependencies
-        run: pnpm i --frozen-lockfile --ignore-scripts
+        run: "pnpm i --frozen-lockfile --ignore-scripts"
       - name: lint
-        run: pnpm check:lint
+        run: "pnpm check:lint"
       - name: types
-        run: pnpm check:types
+        run: "pnpm check:types"
       - name: circular dependencies
-        run: pnpm check:circular
+        run: "pnpm check:circular"
       - name: test
-        run: pnpm test
+        run: "pnpm test"
