@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest'
 import { BindingContext } from './binding-context'
 import { BindingMap } from './binding-map'
 import { ResolutionContext } from './resolution-context'
+import { deferred } from './types/deferred'
 
 describe('BindingContext', () => {
   afterEach(() => {
@@ -194,15 +195,18 @@ describe('BindingContext', () => {
     const context = new BindingContext(rootMap)
     const key = Symbol('test')
     const value = { id: 1 }
+    const def = deferred<void>()
     const factory = vi.fn(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10))
+      await def.promise
       return value
     })
-    const result = await context.resolve({
+    const resultPromise = context.resolve({
       key,
       scope: 'root',
       use: factory,
     })
+    def.resolve()
+    const result = await resultPromise
     expect(result).toBe(value)
     expect(factory).toHaveBeenCalledOnce()
   })

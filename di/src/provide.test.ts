@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { createContext, provide } from './index'
+import { deferred } from './types/deferred'
 
 describe('provide', () => {
   afterEach(() => {
@@ -195,19 +196,22 @@ describe('provide', () => {
   test('handles async factory functions', async () => {
     const context = createContext()
     const value = { id: 1 }
+    const def = deferred<void>()
     const factory = vi.fn(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10))
+      await def.promise
       return value
     })
     const ref = provide({
       name: 'test',
       use: factory,
     })
-    await context.run(async () => {
-      const result = await ref()
-      expect(result).toBe(value)
-      expect(factory).toHaveBeenCalledOnce()
+    const resultPromise = context.run(async () => {
+      return await ref()
     })
+    def.resolve()
+    const result = await resultPromise
+    expect(result).toBe(value)
+    expect(factory).toHaveBeenCalledOnce()
   })
 
   test('reuses same binding for same ref', async () => {

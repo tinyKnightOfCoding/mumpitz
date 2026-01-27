@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { RootContext } from './root-context'
+import { deferred } from './types/deferred'
 
 describe('RootContext', () => {
   afterEach(() => {
@@ -150,14 +151,16 @@ describe('RootContext', () => {
     const rootOnDestroy = vi.fn()
     let request1Completed = false
     let request2Completed = false
+    const def1 = deferred<void>()
+    const def2 = deferred<void>()
     // Start two concurrent requests
     const request1 = context.run(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20))
+      await def1.promise
       request1Completed = true
       return 'request1'
     })
     const request2 = context.run(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20))
+      await def2.promise
       request2Completed = true
       return 'request2'
     })
@@ -175,6 +178,9 @@ describe('RootContext', () => {
     expect(request1Completed).toBe(false)
     expect(request2Completed).toBe(false)
     expect(rootOnDestroy).not.toHaveBeenCalled()
+    // Resolve requests to complete
+    def1.resolve()
+    def2.resolve()
     // Wait for requests to complete
     await request1
     await request2

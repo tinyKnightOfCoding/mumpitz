@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { Binding } from './binding'
+import { deferred } from './types/deferred'
 
 describe('Binding', () => {
   afterEach(() => {
@@ -81,11 +82,9 @@ describe('Binding', () => {
     const parentDestroyed = vi.fn()
     const childDestroyed = vi.fn()
     const parent = new Binding(Promise.resolve('parent'), parentDestroyed)
-    const childDeferred = new Promise<void>((resolve) => {
-      setTimeout(resolve, 10)
-    })
+    const childDeferred = deferred<void>()
     const child = new Binding(Promise.resolve('child'), async () => {
-      await childDeferred
+      await childDeferred.promise
       childDestroyed()
     })
     parent.addDependent(child)
@@ -93,8 +92,10 @@ describe('Binding', () => {
     // Parent should not be destroyed yet
     expect(parentDestroyed).not.toHaveBeenCalled()
     expect(childDestroyed).not.toHaveBeenCalled()
-    // Destroy child (which will take 10ms)
-    await child.destroy()
+    // Destroy child and resolve deferred
+    const childDestroyPromise = child.destroy()
+    childDeferred.resolve()
+    await childDestroyPromise
     // Now parent can complete
     await destroyPromise
     // Both should be destroyed now
@@ -128,13 +129,15 @@ describe('Binding', () => {
   test('handles async onDestroy callback', async () => {
     const value = { id: 1 }
     let callbackResolved = false
+    const def = deferred<void>()
     const onDestroy = vi.fn(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10))
+      await def.promise
       callbackResolved = true
     })
     const binding = new Binding(Promise.resolve(value), onDestroy)
     const destroyPromise = binding.destroy()
     expect(callbackResolved).toBe(false)
+    def.resolve()
     await destroyPromise
     expect(callbackResolved).toBe(true)
     expect(onDestroy).toHaveBeenCalledWith(value)

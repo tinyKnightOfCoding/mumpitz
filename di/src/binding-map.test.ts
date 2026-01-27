@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { BindingMap } from './binding-map'
+import { deferred } from './types/deferred'
 
 describe('BindingMap', () => {
   afterEach(() => {
@@ -153,11 +154,14 @@ describe('BindingMap', () => {
     const map = new BindingMap<[]>()
     const key = Symbol('test')
     const value = { id: 1 }
+    const def = deferred<void>()
     const factory = vi.fn(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10))
+      await def.promise
       return value
     })
-    const result = await map.resolve({ key, use: factory })
+    const resultPromise = map.resolve({ key, use: factory })
+    def.resolve()
+    const result = await resultPromise
     expect(result).toBe(value)
     expect(factory).toHaveBeenCalledOnce()
   })

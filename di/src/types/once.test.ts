@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
+import { deferred } from './deferred'
 import { once } from './once'
 
 describe('once', () => {
@@ -69,8 +70,9 @@ describe('once', () => {
   })
 
   test('handles async callbacks', async () => {
+    const def = deferred<void>()
     const callback = vi.fn(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10))
+      await def.promise
       return 'async-result'
     })
     const wrapped = once(callback)
@@ -78,6 +80,7 @@ describe('once', () => {
     const promise2 = wrapped()
     const promise3 = wrapped()
     expect(callback).toHaveBeenCalledOnce()
+    def.resolve()
     const result1 = await promise1
     const result2 = await promise2
     const result3 = await promise3
@@ -87,8 +90,9 @@ describe('once', () => {
   })
 
   test('returns same promise reference for async callbacks', async () => {
+    const def = deferred<void>()
     const callback = vi.fn(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10))
+      await def.promise
       return 'async-result'
     })
     const wrapped = once(callback)
@@ -98,6 +102,7 @@ describe('once', () => {
     expect(promise1).toBe(promise2)
     expect(promise2).toBe(promise3)
     expect(callback).toHaveBeenCalledOnce()
+    def.resolve()
     await promise1
   })
 
