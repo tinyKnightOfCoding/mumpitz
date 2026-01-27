@@ -1,0 +1,37 @@
+name: Check Pull Request
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - di/**
+      - .github/workflows/di.yaml
+concurrency:
+  group: push-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache-dependency-path: pnpm-lock.yaml
+          cache: pnpm
+      - name: install dependencies
+        run: pnpm i --frozen-lockfile --ignore-scripts
+      - name: lint
+        run: pnpm check:lint
+      - name: types
+        run: pnpm check:types
+      - name: circular dependencies
+        run: pnpm check:circular
+      - name: test
+        run: pnpm test
