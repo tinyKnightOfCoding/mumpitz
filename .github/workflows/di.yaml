@@ -9,9 +9,13 @@ on:
 concurrency:
   group: push-${{ github.ref }}
   cancel-in-progress: true
+defaults:
+  run:
+    working-directory: di
 jobs:
   check:
     runs-on: ubuntu-latest
+
     steps:
       - name: checkout
         uses: actions/checkout@v6
