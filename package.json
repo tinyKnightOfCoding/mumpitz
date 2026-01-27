@@ -1,0 +1,19 @@
+{
+  "name": "@mumpitz/di",
+  "version": "0.1.0",
+  "scripts": {
+    "check:types": "tsc --noEmit",
+    "check:circular": "madge --ts-config tsconfig.json --circular --extensions ts src",
+    "lint": "biome check --error-on-warnings --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.11",
+    "madge": "8.0.0",
+    "typescript": "5.9.3",
+    "vitest": "4.0.17"
+  },
+  "packageManager": "pnpm@10.26.2",
+  "engines": {
+    "node": "^24"
+  }
+}
