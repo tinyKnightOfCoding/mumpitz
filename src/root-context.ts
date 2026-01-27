@@ -1,0 +1,65 @@
+import { AsyncLocalStorage } from 'node:async_hooks'
+import { BindingContext, type BindingContextOptions } from '@/binding-context'
+import { BindingMap } from '@/binding-map'
+import { type Defined, isDefined, once } from '@/types'
+
+export class RootContext {
+  private static readonly store = new AsyncLocalStorage<BindingContext>()
+
+  static readonly resolve = <T extends Defined>(options: BindingContextOptions<T>): Promise<T> => {
+    return RootContext.currentOrThrow().resolve(options)
+  }
+
+  static readonly isBound = (key: symbol, scope: 'root' | 'request') => {
+    return RootContext.currentOrThrow().isBound(key, scope)
+  }
+
+  private static readonly currentOrThrow = () => {
+    const current = RootContext.store.getStore()
+    if (!isDefined(current)) {
+      throw new Error('Cannot resolve binding outside of context')
+    }
+    return current
+  }
+
+  private readonly rootMap = new BindingMap()
+  private readonly requests = new Set<BindingContext>()
+  private _isDestroyed = false
+
+  get isDestroyed() {
+    return this._isDestroyed
+  }
+
+  readonly run = async <T>(callback: () => T): Promise<T> => {
+    this.assertNotDestroyed()
+    const request = new BindingContext(this.rootMap)
+    this.requests.add(request)
+    try {
+      const result = await RootContext.store.run(request, callback)
+      await request.destroy({ reason: 'success', result })
+      return result
+    } catch (error) {
+      await request.destroy({ reason: 'error', error })
+      throw error
+    } finally {
+      this.requests.delete(request)
+    }
+  }
+
+  readonly destroy = once(async () => {
+    try {
+      this._isDestroyed = true
+      const allRequestsCompleted = [...this.requests].map((request) => request.destroyed())
+      await Promise.allSettled(allRequestsCompleted)
+      await this.rootMap.destroy()
+    } catch (error) {
+      // TODO figure out error handling
+    }
+  })
+
+  private readonly assertNotDestroyed = () => {
+    if (this._isDestroyed) {
+      throw new Error('This binding has been destroyed.')
+    }
+  }
+}
