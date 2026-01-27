@@ -52,19 +52,16 @@ describe('BindingContext', () => {
       },
     })
     // Resolve child with parent as dependent (via resolution context)
-    await ResolutionContext.empty().run(
-      { key: parentKey, scope: 'request' },
-      async () => {
-        await context.resolve({
-          key: childKey,
-          scope: 'request',
-          use: () => 'child',
-          onDestroy: () => {
-            destroyOrder.push('child')
-          },
-        })
-      },
-    )
+    await ResolutionContext.empty().run({ key: parentKey, scope: 'request' }, async () => {
+      await context.resolve({
+        key: childKey,
+        scope: 'request',
+        use: () => 'child',
+        onDestroy: () => {
+          destroyOrder.push('child')
+        },
+      })
+    })
     await context.destroy({ reason: 'success', result: null })
     expect(destroyOrder).toContain('child')
     expect(destroyOrder).toContain('parent')
