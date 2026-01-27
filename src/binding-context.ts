@@ -44,6 +44,7 @@ export class BindingContext {
   }
 
   readonly isBound = (key: symbol, scope: 'root' | 'request') => {
+    // biome-ignore lint/nursery/noUnnecessaryConditions: false positive
     switch (scope) {
       case 'root':
         return this.rootMap.isBound(key)

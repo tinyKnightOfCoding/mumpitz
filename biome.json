@@ -10,7 +10,8 @@
     "rules": {
       "recommended": true,
       "nursery": {
-        "noFloatingPromises": "error"
+        "noFloatingPromises": "error",
+        "noUnnecessaryConditions": "error"
       },
       "style": {
         "useConsistentTypeDefinitions": {
