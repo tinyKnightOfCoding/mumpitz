@@ -58,7 +58,7 @@ export class BindingContext {
     try {
       this.isDestroyed = true
       await this.requestMap.destroy(options)
-    } catch (error) {
+    } catch (_error) {
       // TODO figure out error handling
     } finally {
       this._destroyed.resolve()

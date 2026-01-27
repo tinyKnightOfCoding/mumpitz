@@ -52,7 +52,7 @@ export class RootContext {
       const allRequestsCompleted = [...this.requests].map((request) => request.destroyed())
       await Promise.allSettled(allRequestsCompleted)
       await this.rootMap.destroy()
-    } catch (error) {
+    } catch (_error) {
       // TODO figure out error handling
     }
   })

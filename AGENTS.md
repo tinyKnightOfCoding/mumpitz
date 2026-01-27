@@ -17,5 +17,5 @@
 - Do not assume all tests should pass. Question green tests and consider whether they hide a real bug
 - Use vi.mock only for IO or external boundaries and prefer vi.spyOn for internal seams
 - Clean up spies in afterEach with vi.restoreAllMocks()
-- Use fake timers only when needed and always return to real timers
+- Use fake timers when needed and always return to real timers
 - Prefer test.each for input/output style units and avoid snapshots for non-UI logic
