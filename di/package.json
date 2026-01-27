@@ -5,6 +5,7 @@
   "types": "./dist/index.d.ts",
   "module": "./dist/index.js",
   "scripts": {
+    "clean": "del-cli dist",
     "build": "tsc",
     "dev:test": "vitest",
     "check:lint": "biome ci --error-on-warnings .",
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.11",
     "@types/node": "24.1.0",
+    "del-cli": "7.0.0",
     "madge": "8.0.0",
     "typescript": "5.9.3",
     "vite-tsconfig-paths": "6.0.5",
@@ -27,8 +29,10 @@
   },
   "files": [
     "src",
-    "dist"
+    "dist",
+    "LICENSE"
   ],
+  "license": "MIT",
   "author": "Kenneth Radunz",
   "repository": {
     "type": "git",

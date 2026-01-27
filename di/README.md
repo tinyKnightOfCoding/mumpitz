@@ -338,10 +338,11 @@ Future enhancements and features under consideration:
 - **Multi Bindings**: Support for binding multiple implementations to the same key, enabling plugin architectures and strategy patterns
 - **Graceful Shutdown**: Enhanced shutdown handling with configurable timeouts, in-flight request completion, and health check integration
 - **HMR Support**: Hot Module Replacement support for development, allowing dependency updates without full application restart
+- **Caching**?
 
 ## License
 
-[License information to be added]
+[MIT](LICENSE)
 
 ## Contributing
 
