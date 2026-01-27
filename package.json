@@ -2,9 +2,11 @@
   "name": "@mumpitz/di",
   "version": "0.1.0",
   "scripts": {
+    "dev:test": "vitest",
     "check:types": "tsc --noEmit",
     "check:circular": "madge --ts-config tsconfig.json --circular --extensions ts src",
-    "lint": "biome check --error-on-warnings --write ."
+    "lint": "biome check --error-on-warnings --write .",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.11",

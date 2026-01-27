@@ -31,7 +31,10 @@
     "rootDir": "${configDir}/src",
 
     "incremental": true,
-    "tsBuildInfoFile": "${configDir}/dist/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "${configDir}/dist/tsconfig.tsbuildinfo",
+    "paths": {
+      "@/*": ["${configDir}/src/*"]
+    }
   },
   "include": ["${configDir}/src"]
 }
