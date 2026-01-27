@@ -18,7 +18,7 @@
     "erasableSyntaxOnly": true,
     "skipLibCheck": true,
 
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "module": "ESNext",
     "esModuleInterop": true,
     "lib": ["Es2022"],
