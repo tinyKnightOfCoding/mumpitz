@@ -32,7 +32,7 @@ export class Binding<T extends Defined = Defined, TDestroyParams extends unknown
     this.destroyCallback = destroyCallback
   }
 
-  readonly get = () => {
+  readonly get = (): Promise<T> => {
     this.assertNotDestroyed()
     return this.value
   }
@@ -42,20 +42,22 @@ export class Binding<T extends Defined = Defined, TDestroyParams extends unknown
     this.dependents.push(dependent)
   }
 
-  readonly destroyed = () => this._destroyed.promise
+  readonly destroyed = (): Promise<void> => this._destroyed.promise
 
-  readonly destroy = once(async (...args: TDestroyParams) => {
-    try {
-      const value = await this.value
-      this.isDestroyed = true
-      await Promise.all(this.dependents.map((dependent) => dependent.destroyed()))
-      await this.destroyCallback?.(value, ...args)
-    } catch (_error) {
-      // TODO figure out error handling
-    } finally {
-      this._destroyed.resolve()
-    }
-  })
+  readonly destroy: (...args: TDestroyParams) => Promise<void> = once(
+    async (...args: TDestroyParams): Promise<void> => {
+      try {
+        const value = await this.value
+        this.isDestroyed = true
+        await Promise.all(this.dependents.map((dependent) => dependent.destroyed()))
+        await this.destroyCallback?.(value, ...args)
+      } catch (_error) {
+        // TODO figure out error handling
+      } finally {
+        this._destroyed.resolve()
+      }
+    },
+  )
 
   private readonly assertNotDestroyed = () => {
     if (this.isDestroyed) {

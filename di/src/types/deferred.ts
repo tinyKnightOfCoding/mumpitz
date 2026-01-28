@@ -15,15 +15,15 @@ export class Deferred<T> {
     })
   }
 
-  get value() {
+  get value(): T | undefined {
     return this._value
   }
 
-  get error() {
+  get error(): unknown | undefined {
     return this._error
   }
 
-  get isCompleted() {
+  get isCompleted(): boolean {
     return this._state !== 'pending'
   }
 
@@ -31,13 +31,13 @@ export class Deferred<T> {
     return this._state
   }
 
-  readonly resolve = (value: T) => {
+  readonly resolve = (value: T): void => {
     if (this._state !== 'pending') return
     this._state = 'resolved'
     this._value = value
     this.capturedResolve(value)
   }
-  readonly reject = (reason?: unknown) => {
+  readonly reject = (reason?: unknown): void => {
     if (this._state !== 'pending') return
     this._state = 'rejected'
     this._error = reason

@@ -8,9 +8,9 @@ type ResolutionElement = {
 export class ResolutionContext {
   private static readonly store = new AsyncLocalStorage<ResolutionContext>()
 
-  static current = () => ResolutionContext.store.getStore()
+  static current = (): ResolutionContext | undefined => ResolutionContext.store.getStore()
 
-  static empty = () => new ResolutionContext()
+  static empty = (): ResolutionContext => new ResolutionContext()
 
   private readonly elements: ResolutionElement[]
 
@@ -18,7 +18,7 @@ export class ResolutionContext {
     this.elements = elements
   }
 
-  readonly peek = () => this.elements[this.elements.length - 1]?.key
+  readonly peek = (): symbol | undefined => this.elements[this.elements.length - 1]?.key
 
   readonly run = <TResult>(element: ResolutionElement, callback: () => TResult): TResult => {
     this.assertNoDependencyCycle(element)
@@ -27,7 +27,7 @@ export class ResolutionContext {
     return ResolutionContext.store.run(nextContext, callback)
   }
 
-  readonly toString = () => this.elements.map((el) => el.key.description).join('->')
+  readonly toString = (): string => this.elements.map((el) => el.key.description).join('->')
 
   private readonly assertNoInvalidScope = (dependency: ResolutionElement) => {
     // request can depend on root or request, but root cannot depend on request

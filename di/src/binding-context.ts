@@ -43,7 +43,7 @@ export class BindingContext {
     })
   }
 
-  readonly isBound = (key: symbol, scope: 'root' | 'request') => {
+  readonly isBound = (key: symbol, scope: 'root' | 'request'): boolean => {
     // biome-ignore lint/nursery/noUnnecessaryConditions: false positive
     switch (scope) {
       case 'root':
@@ -53,9 +53,9 @@ export class BindingContext {
     }
   }
 
-  readonly destroyed = () => this._destroyed.promise
+  readonly destroyed = (): Promise<void> => this._destroyed.promise
 
-  readonly destroy = once(async (options: RequestResult) => {
+  readonly destroy: (options: RequestResult) => Promise<void> = once(async (options: RequestResult): Promise<void> => {
     try {
       this.isDestroyed = true
       await this.requestMap.destroy(options)

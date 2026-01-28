@@ -28,14 +28,16 @@ export class BindingMap<TDestroyParams extends unknown[]> {
     return this.bindings.has(key)
   }
 
-  readonly destroy = once(async (...args: TDestroyParams) => {
-    this.isDestroyed = true
-    const promise = [...this.bindings.values()].map((binding) => binding.destroy(...args))
-    const results = await Promise.allSettled(promise)
-    if (results.some((result) => result.status === 'rejected')) {
-      // TODO figure out error handling
-    }
-  })
+  readonly destroy: (...args: TDestroyParams) => Promise<void> = once(
+    async (...args: TDestroyParams): Promise<void> => {
+      this.isDestroyed = true
+      const promise = [...this.bindings.values()].map((binding) => binding.destroy(...args))
+      const results = await Promise.allSettled(promise)
+      if (results.some((result) => result.status === 'rejected')) {
+        // TODO figure out error handling
+      }
+    },
+  )
 
   private readonly getOrCreate = <T extends Defined>(
     options: BindingMapOptions<T, TDestroyParams>,

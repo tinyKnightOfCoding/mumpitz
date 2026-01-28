@@ -10,11 +10,11 @@ export class RootContext {
     return RootContext.currentOrThrow().resolve(options)
   }
 
-  static readonly isBound = (key: symbol, scope: 'root' | 'request') => {
+  static readonly isBound = (key: symbol, scope: 'root' | 'request'): boolean => {
     return RootContext.currentOrThrow().isBound(key, scope)
   }
 
-  private static readonly currentOrThrow = () => {
+  private static readonly currentOrThrow = (): BindingContext => {
     const current = RootContext.store.getStore()
     if (!isDefined(current)) {
       throw new Error('Cannot resolve binding outside of context')
@@ -26,7 +26,7 @@ export class RootContext {
   private readonly requests = new Set<BindingContext>()
   private _isDestroyed = false
 
-  get isDestroyed() {
+  get isDestroyed(): boolean {
     return this._isDestroyed
   }
 
@@ -46,7 +46,7 @@ export class RootContext {
     }
   }
 
-  readonly destroy = once(async () => {
+  readonly destroy: () => Promise<void> = once(async (): Promise<void> => {
     try {
       this._isDestroyed = true
       const allRequestsCompleted = [...this.requests].map((request) => request.destroyed())
