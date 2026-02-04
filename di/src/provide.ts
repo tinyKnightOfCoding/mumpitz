@@ -29,7 +29,7 @@ export type ProvideOptions<T extends Defined> = RequestProvideOptions<T> | RootP
 
 export function provide<T extends Defined>(options: ProvideOptions<T>): Ref<T> {
   const contextOptions: BindingContextOptions<T> = {
-    key: Symbol(options.name),
+    key: Symbol.for(options.name),
     use: options.use ?? neverFactory(options.name),
     scope: options.scope ?? 'root',
     onDestroy: options.onDestroy,
