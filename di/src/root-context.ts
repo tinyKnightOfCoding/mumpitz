@@ -3,8 +3,18 @@ import { BindingContext, type BindingContextOptions } from '@/binding-context'
 import { BindingMap } from '@/binding-map'
 import { type Defined, isDefined, once } from '@/types'
 
+type TypedGlobal = {__rootContextStore?: AsyncLocalStorage<BindingContext>}
+
+function getBindingContextStore(): AsyncLocalStorage<BindingContext> {
+  const typedGlobal: TypedGlobal = globalThis as TypedGlobal
+  if (!isDefined(typedGlobal.__rootContextStore)) {
+    typedGlobal.__rootContextStore = new AsyncLocalStorage<BindingContext>()
+  }
+  return typedGlobal.__rootContextStore
+}
+
 export class RootContext {
-  private static readonly store = new AsyncLocalStorage<BindingContext>()
+  private static readonly store: AsyncLocalStorage<BindingContext> = getBindingContextStore()
 
   static readonly resolve = <T extends Defined>(options: BindingContextOptions<T>): Promise<T> => {
     return RootContext.currentOrThrow().resolve(options)
