@@ -3,7 +3,7 @@ import { BindingContext, type BindingContextOptions } from '@/binding-context'
 import { BindingMap } from '@/binding-map'
 import { type Defined, isDefined, once } from '@/types'
 
-type TypedGlobal = {__rootContextStore?: AsyncLocalStorage<BindingContext>}
+type TypedGlobal = { __rootContextStore?: AsyncLocalStorage<BindingContext> }
 
 function getBindingContextStore(): AsyncLocalStorage<BindingContext> {
   const typedGlobal: TypedGlobal = globalThis as TypedGlobal
