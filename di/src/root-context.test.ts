@@ -142,7 +142,56 @@ describe('RootContext', () => {
       context.run(async () => {
         return 'value'
       }),
-    ).rejects.toThrow('This binding has been destroyed.')
+    ).rejects.toThrow('This context has been destroyed.')
+  })
+
+  test('wraps handler in context.run using with', async () => {
+    const context = new RootContext()
+    const handler = context.with(async () => {
+      return await RootContext.resolve({ key: Symbol('test'), scope: 'request', use: () => 'value' })
+    })
+    const result = await handler()
+    expect(result).toBe('value')
+  })
+
+  test('passes arguments through to with handler', async () => {
+    const context = new RootContext()
+    const handler = context.with(async (a: string, b: number) => {
+      return `${a}-${b}`
+    })
+    const result = await handler('hello', 42)
+    expect(result).toBe('hello-42')
+  })
+
+  test('destroys request bindings after with handler completes', async () => {
+    const context = new RootContext()
+    const onDestroy = vi.fn()
+    const handler = context.with(async () => {
+      await RootContext.resolve({
+        key: Symbol('request'),
+        scope: 'request',
+        use: () => 'value',
+        onDestroy,
+      })
+    })
+    await handler()
+    expect(onDestroy).toHaveBeenCalledWith('value', { reason: 'success', result: undefined })
+  })
+
+  test('propagates errors from with handler', async () => {
+    const context = new RootContext()
+    const error = new Error('handler error')
+    const handler = context.with(async () => {
+      throw error
+    })
+    await expect(handler()).rejects.toBe(error)
+  })
+
+  test('throws when calling with handler after destroy', async () => {
+    const context = new RootContext()
+    const handler = context.with(async () => 'value')
+    await context.destroy()
+    await expect(handler()).rejects.toThrow('This context has been destroyed.')
   })
 
   test('waits for all requests before destroying root', async () => {

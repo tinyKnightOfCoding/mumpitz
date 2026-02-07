@@ -14,7 +14,7 @@ type RequestBindingContextOptions<T extends Defined> = {
   key: symbol
   scope: 'request'
   use: () => Awaitable<T>
-  onDestroy?: (value: T, options: RequestResult) => Awaitable<void>
+  onDestroy?: (value: T, result: RequestResult) => Awaitable<void>
 }
 
 export type BindingContextOptions<T extends Defined> = RootBindingContextOptions<T> | RequestBindingContextOptions<T>

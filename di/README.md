@@ -154,33 +154,16 @@ export const nextRequest = provide<NextRequest>({
 })
 ```
 
-A `withContext` helper keeps route handlers clean by wrapping them in `context.run` and binding the request automatically:
-
-```typescript
-// lib/with-context.ts
-import type { NextRequest } from 'next/server'
-import { context } from './context'
-import { nextRequest } from './request'
-
-export function withContext(handler: () => Promise<Response>) {
-  return (request: NextRequest) =>
-    context.run(async () => {
-      nextRequest.bindTo(request)
-      return handler()
-    })
-}
-```
-
-Route handlers then access the request through the DI container instead of coupling to the framework directly:
+`context.with` wraps a handler in `context.run`, so you can use `bindTo` inside the handler directly:
 
 ```typescript
 // app/api/users/route.ts
-import { withContext } from '@/lib/with-context'
+import { context } from '@/lib/context'
 import { nextRequest } from '@/lib/request'
 import { NextResponse } from 'next/server'
 
-export const GET = withContext(async () => {
-  const request = await nextRequest()
+export const GET = context.with(async (request: NextRequest) => {
+  nextRequest.bindTo(request)
   const search = request.nextUrl.searchParams.get('search')
   // ... business logic ...
   return NextResponse.json({ search })
@@ -195,7 +178,8 @@ Creates a new root dependency injection context.
 
 **Returns:** A `RootContext` instance with the following methods:
 
-- `run<T>(callback: () => T): Promise<T>` — Executes the callback within a request scope. Request-scoped bindings are created and destroyed within this call.
+- `run<T>(callback: () => T): Promise<Awaited<T>>` — Executes the callback within a request scope. Request-scoped bindings are created and destroyed within this call.
+- `with<TArgs, T>(handler: (...args: TArgs) => T): (...args: TArgs) => Promise<Awaited<T>>` — Wraps a handler so each call executes inside `run`. Arguments are passed through to the handler.
 - `destroy(): Promise<void>` — Waits for in-flight requests to complete, then destroys all root-scoped bindings.
 - `isDestroyed: boolean` — Whether the context has been destroyed.
 
@@ -239,7 +223,7 @@ Bindings are destroyed in **reverse order** of creation.
 
 ## Best Practices
 
-1. **Wrap each route handler in `context.run`** — Ensures proper creation and cleanup of request-scoped bindings per request.
+1. **Wrap each route handler in `context.run` or `context.with`** — Ensures proper creation and cleanup of request-scoped bindings per request.
 2. **Use root scope for singletons** — Database connections, configuration, and shared services.
 3. **Use request scope for per-request state** — Transactions, user sessions, and temporary resources.
 4. **Keep providers in separate modules** — Enables tree-shaking so each server function only bundles what it uses.

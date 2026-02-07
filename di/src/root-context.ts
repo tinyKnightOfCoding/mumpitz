@@ -40,7 +40,13 @@ export class RootContext {
     return this._isDestroyed
   }
 
-  readonly run = async <T>(callback: () => T): Promise<T> => {
+  readonly with = <TArgs extends unknown[], T>(
+    handler: (...args: TArgs) => T,
+  ): ((...args: TArgs) => Promise<Awaited<T>>) => {
+    return (...args: TArgs) => this.run(() => handler(...args))
+  }
+
+  readonly run = async <T>(callback: () => T): Promise<Awaited<T>> => {
     this.assertNotDestroyed()
     const request = new BindingContext(this.rootMap)
     this.requests.add(request)
@@ -69,7 +75,7 @@ export class RootContext {
 
   private readonly assertNotDestroyed = () => {
     if (this._isDestroyed) {
-      throw new Error('This binding has been destroyed.')
+      throw new Error('This context has been destroyed.')
     }
   }
 }
