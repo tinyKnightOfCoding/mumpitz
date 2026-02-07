@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, test, vi } from 'vitest'
-import { createContext, provide } from './index'
+import { afterEach, describe, expect, expectTypeOf, test, vi } from 'vitest'
+import { createContext, type ProvideOptions, provide } from './index'
 import { deferred } from './types/deferred'
 
 describe('provide', () => {
@@ -327,5 +327,13 @@ describe('provide', () => {
     })
     expect(factory1).toHaveBeenCalledOnce()
     expect(factory2).toHaveBeenCalledOnce()
+  })
+
+  test('rejects functions as provide options', () => {
+    expectTypeOf(() => 'hello').not.toMatchTypeOf<ProvideOptions<string>>()
+    expectTypeOf(async () => 'hello').not.toMatchTypeOf<ProvideOptions<string>>()
+    expectTypeOf(function named() {
+      return 'hello'
+    }).not.toMatchTypeOf<ProvideOptions<string>>()
   })
 })

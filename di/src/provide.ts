@@ -11,6 +11,7 @@ export type Ref<T extends Defined> = {
 export type BaseProvideOptions<T extends Defined> = {
   name: string
   use?: () => Awaitable<T>
+  call?: never // excludes Function from this type
 }
 
 export type RootProvideOptions<T extends Defined> = BaseProvideOptions<T> & {
