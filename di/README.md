@@ -4,12 +4,12 @@ A lightweight, type-safe dependency injection library for Node.js-based serverle
 
 ## Design Principles
 
-- **Fully Async** — All factory and destruction callbacks are async because serverless workloads are inherently I/O-bound.
-- **Tree-Shakeable** — No service locator or central registry. Each dependency is a standalone reference, so bundlers like those in Next.js only
+- **Fully Async**: All factory and destruction callbacks are async because serverless workloads are inherently I/O-bound.
+- **Tree-Shakeable**: No service locator or central registry. Each dependency is a standalone reference, so bundlers like those in Next.js only
   include what each server function actually uses.
-- **Request-Aware** — First-class request scope with automatic per-request lifecycle, reflecting that serverless business logic runs inside discrete
+- **Request-Aware**: First-class request scope with automatic per-request lifecycle, reflecting that serverless business logic runs inside discrete
   request handlers.
-- **Minimal API** — An opinionated, small surface area rather than a swiss-army knife.
+- **Minimal API**: An opinionated, small surface area rather than a swiss-army knife.
 
 ## Quick Start
 
@@ -178,10 +178,10 @@ Creates a new root dependency injection context.
 
 **Returns:** A `RootContext` instance with the following methods:
 
-- `run<T>(callback: () => T): Promise<Awaited<T>>` — Executes the callback within a request scope. Request-scoped bindings are created and destroyed within this call.
-- `with<TArgs, T>(handler: (...args: TArgs) => T): (...args: TArgs) => Promise<Awaited<T>>` — Wraps a handler so each call executes inside `run`. Arguments are passed through to the handler.
-- `destroy(): Promise<void>` — Waits for in-flight requests to complete, then destroys all root-scoped bindings.
-- `isDestroyed: boolean` — Whether the context has been destroyed.
+- `run<T>(callback: () => T): Promise<Awaited<T>>`: Executes the callback within a request scope. Request-scoped bindings are created and destroyed within this call.
+- `with<TArgs, T>(handler: (...args: TArgs) => T): (...args: TArgs) => Promise<Awaited<T>>`: Wraps a handler so each call executes inside `run`. Arguments are passed through to the handler.
+- `destroy(): Promise<void>`: Waits for in-flight requests to complete, then destroys all root-scoped bindings.
+- `isDestroyed: boolean`: Whether the context has been destroyed.
 
 ### `provide<T>(options): Ref<T>`
 
