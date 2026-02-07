@@ -22,7 +22,7 @@ export type RequestResult = { reason: 'error'; error: unknown } | { reason: 'suc
 
 export type RequestProvideOptions<T extends Defined> = BaseProvideOptions<T> & {
   scope: 'request'
-  onDestroy?: (value: T, options: RequestResult) => Awaited<void>
+  onDestroy?: (value: T, options: RequestResult) => Awaitable<void>
 }
 
 export type ProvideOptions<T extends Defined> = RequestProvideOptions<T> | RootProvideOptions<T>

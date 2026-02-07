@@ -1,268 +1,190 @@
 # @mumpitz/di
 
-A lightweight, type-safe dependency injection library for Node.js with support for root and request-scoped bindings, lifecycle management, and async context isolation.
+A lightweight, type-safe dependency injection library for Node.js-based serverless environments.
 
-## Features
+## Design Principles
 
-- 🎯 **Type-safe**: Full TypeScript support with strict type checking
-- 🔄 **Dual Scoping**: Root-scoped (singleton) and request-scoped bindings
-- 🧹 **Lifecycle Management**: Automatic cleanup with `onDestroy` callbacks
-- 🔒 **Context Isolation**: Uses Node.js `AsyncLocalStorage` for request isolation
-- ⚡ **Async Support**: Native support for async factories and cleanup
-- 🎨 **Simple API**: Minimal, intuitive API surface
-- 🚀 **Zero Dependencies**: No runtime dependencies
-
-## Requirements
-
-- **Node.js**: `^24` (uses `AsyncLocalStorage` from `node:async_hooks`)
-
-## Installation
-
-```bash
-pnpm add @mumpitz/di
-# or
-npm install @mumpitz/di
-# or
-yarn add @mumpitz/di
-```
+- **Fully Async** — All factory and destruction callbacks are async because serverless workloads are inherently I/O-bound.
+- **Tree-Shakeable** — No service locator or central registry. Each dependency is a standalone reference, so bundlers like those in Next.js only
+  include what each server function actually uses.
+- **Request-Aware** — First-class request scope with automatic per-request lifecycle, reflecting that serverless business logic runs inside discrete
+  request handlers.
+- **Minimal API** — An opinionated, small surface area rather than a swiss-army knife.
 
 ## Quick Start
 
+Create a shared context and define a database provider:
+
 ```typescript
-import { createContext, provide } from '@mumpitz/di'
+// lib/context.ts
+import { createContext } from '@mumpitz/di'
 
-// Create a root context
-const context = createContext()
-
-// Define a database connection (root-scoped singleton)
-const database = provide({
-  name: 'database',
-  scope: 'root',
-  use: async () => {
-    // Create database connection
-    const connection = await createConnection({
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT || '5432')
-    })
-    return connection
-  },
-  onDestroy: async (db) => {
-    await db.close()
-  }
-})
-
-// Use the database within a context
-await context.run(async () => {
-  const db = await database()
-  const users = await db.query('SELECT * FROM users')
-  console.log(users)
-})
-
-// Clean up when done
-await context.destroy()
+export const context = createContext()
 ```
 
-## Usage Examples
+```typescript
+// lib/database.ts
+import { provide } from '@mumpitz/di'
+
+export const database = provide({
+  name: 'database',
+  scope: 'root',
+  use: async () => createConnection(process.env.DATABASE_URL),
+  onDestroy: async (db) => {
+    await db.close()
+  },
+})
+```
+
+Use them in a Next.js API route. Each route handler should be wrapped in a single `context.run` call:
+
+```typescript
+// app/api/users/route.ts
+import { context } from '@/lib/context'
+import { database } from '@/lib/database'
+import { NextResponse } from 'next/server'
+
+export async function GET() {
+  return context.run(async () => {
+    const db = await database()
+    const users = await db.query('SELECT * FROM users')
+    return NextResponse.json(users)
+  })
+}
+```
+
+## Examples
 
 ### Root-Scoped Bindings (Singleton)
 
-Root-scoped bindings are created once and shared across all requests. Perfect for database connections, configuration, and other singletons:
+Root-scoped bindings are created once and shared across all requests within the same serverless instance. Use them for database connections, configuration, and other long-lived resources:
 
 ```typescript
-const database = provide({
+// lib/database.ts
+import { provide } from '@mumpitz/di'
+
+export const database = provide({
   name: 'database',
   scope: 'root',
   use: async () => {
-    // Create database connection (only called once)
-    const connection = await createConnection({
+    // Created once on first resolution, reused across all subsequent requests
+    return createConnection({
       host: process.env.DB_HOST,
       database: process.env.DB_NAME,
       user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD
+      password: process.env.DB_PASSWORD,
     })
-    return connection
   },
   onDestroy: async (db) => {
-    // Clean up connection when context is destroyed
     await db.close()
-  }
+  },
 })
+```
 
-const context = createContext()
+```typescript
+// app/api/users/route.ts
+import { context } from '@/lib/context'
+import { database } from '@/lib/database'
+import { NextResponse } from 'next/server'
 
-// First request - connection is created
-await context.run(async () => {
-  const db = await database()
-  await db.query('SELECT * FROM users')
-})
-
-// Second request - same connection is reused
-await context.run(async () => {
-  const db = await database() // Same connection instance
-  await db.query('SELECT * FROM posts')
-})
-
-// Clean up connection
-await context.destroy() // onDestroy is called, connection is closed
+export async function GET() {
+  return context.run(async () => {
+    const db = await database() // Same connection across all requests
+    const users = await db.query('SELECT * FROM users')
+    return NextResponse.json(users)
+  })
+}
 ```
 
 ### Request-Scoped Bindings
 
-Request-scoped bindings are created fresh for each `context.run()` call. Perfect for transactions, request-specific data, and temporary resources:
+Request-scoped bindings are created fresh for each `context.run` call and destroyed when it completes. Use them for transactions, per-request state, and temporary resources:
 
 ```typescript
-const database = provide({
-  name: 'database',
-  scope: 'root',
-  use: async () => createConnection(/* ... */)
-})
+// lib/transaction.ts
+import { provide } from '@mumpitz/di'
+import { database } from './database'
 
-const transaction = provide({
+export const transaction = provide({
   name: 'transaction',
   scope: 'request',
   use: async () => {
     const db = await database()
-    // Start a new transaction for this request
-    const tx = await db.beginTransaction()
-    return tx
+    return db.beginTransaction()
   },
   onDestroy: async (tx, result) => {
     if (result.reason === 'success') {
-      // Commit transaction on success
       await tx.commit()
     } else {
-      // Rollback transaction on error
       await tx.rollback()
-      console.error('Transaction rolled back:', result.error)
     }
-  }
+  },
 })
+```
 
-const context = createContext()
+```typescript
+// app/api/users/route.ts
+import { context } from '@/lib/context'
+import { transaction } from '@/lib/transaction'
+import { NextResponse, type NextRequest } from 'next/server'
 
-// First request - new transaction
-await context.run(async () => {
-  const tx = await transaction()
-  await tx.query('INSERT INTO users (name) VALUES ($1)', ['Alice'])
-  // Transaction is committed when run completes
-})
-
-// Second request - different transaction
-await context.run(async () => {
-  const tx = await transaction() // New transaction instance
-  await tx.query('INSERT INTO users (name) VALUES ($1)', ['Bob'])
-  // Transaction is committed when run completes
-})
-
-// Error handling - transaction is rolled back
-try {
-  await context.run(async () => {
+export async function POST(request: NextRequest) {
+  return context.run(async () => {
+    const body = await request.json()
     const tx = await transaction()
-    await tx.query('INSERT INTO users (name) VALUES ($1)', ['Charlie'])
-    throw new Error('Something went wrong')
-    // Transaction is rolled back automatically
+    await tx.query('INSERT INTO users (name) VALUES ($1)', [body.name])
+    return NextResponse.json({ success: true })
+    // Transaction auto-commits on success, rolls back on error
   })
-} catch (error) {
-  // Error is caught, transaction was rolled back
 }
 ```
 
 ### Manual Binding
 
-You can manually bind values using `bindTo()`. This is useful when you have the value available before the factory would be called, such as binding the HTTP request object:
+Use `bindTo` to inject values that are not created by a factory. This is useful for framework-provided values like the incoming request:
 
 ```typescript
-const httpRequest = provide({
-  name: 'httpRequest',
+// lib/request.ts
+import { provide } from '@mumpitz/di'
+import type { NextRequest } from 'next/server'
+
+export const nextRequest = provide<NextRequest>({
+  name: 'nextRequest',
   scope: 'request',
-  // No factory - must be bound manually
-})
-
-// In your HTTP server middleware
-app.use(async (req, res, next) => {
-  await context.run(async () => {
-    // Manually bind the request object
-    httpRequest.bindTo(req)
-    
-    // Now handlers can access the request
-    await next()
-  })
-})
-
-// In your route handlers
-app.get('/users', async () => {
-  const req = await httpRequest() // Get the bound request
-  const userId = req.query.userId
-  // Use userId...
 })
 ```
 
-This pattern is especially useful for web frameworks where the request object is available from the framework but needs to be injected into your business logic.
-
-### Checking Binding Status
-
-Check if a binding has been resolved:
+A `withContext` helper keeps route handlers clean by wrapping them in `context.run` and binding the request automatically:
 
 ```typescript
-const service = provide({
-  name: 'service',
-  use: () => ({ value: 42 })
-})
+// lib/with-context.ts
+import type { NextRequest } from 'next/server'
+import { context } from './context'
+import { nextRequest } from './request'
 
-await context.run(async () => {
-  console.log(service.isBound()) // false
-  
-  await service()
-  console.log(service.isBound()) // true
-})
-```
-
-### Async Factories
-
-Factories can return promises:
-
-```typescript
-const dataLoader = provide({
-  name: 'data',
-  use: async () => {
-    const response = await fetch('https://api.example.com/data')
-    return response.json()
-  }
-})
-
-await context.run(async () => {
-  const data = await dataLoader()
-  console.log(data)
-})
-```
-
-### Error Handling
-
-Request-scoped bindings receive error information in their `onDestroy` callback:
-
-```typescript
-const resource = provide({
-  name: 'resource',
-  scope: 'request',
-  use: () => ({ id: 1 }),
-  onDestroy: (resource, result) => {
-    if (result.reason === 'error') {
-      console.error('Request failed:', result.error)
-      // Clean up resources
-    }
-  }
-})
-
-const context = createContext()
-
-try {
-  await context.run(async () => {
-    const res = await resource()
-    throw new Error('Something went wrong')
-  })
-} catch (error) {
-  // onDestroy was called with { reason: 'error', error }
+export function withContext(handler: () => Promise<Response>) {
+  return (request: NextRequest) =>
+    context.run(async () => {
+      nextRequest.bindTo(request)
+      return handler()
+    })
 }
+```
+
+Route handlers then access the request through the DI container instead of coupling to the framework directly:
+
+```typescript
+// app/api/users/route.ts
+import { withContext } from '@/lib/with-context'
+import { nextRequest } from '@/lib/request'
+import { NextResponse } from 'next/server'
+
+export const GET = withContext(async () => {
+  const request = await nextRequest()
+  const search = request.nextUrl.searchParams.get('search')
+  // ... business logic ...
+  return NextResponse.json({ search })
+})
 ```
 
 ## API Reference
@@ -273,61 +195,55 @@ Creates a new root dependency injection context.
 
 **Returns:** A `RootContext` instance with the following methods:
 
-- `run<T>(callback: () => T): Promise<T>` - Execute code within a request context
-- `destroy(): Promise<void>` - Destroy the context and all bindings
-- `isDestroyed: boolean` - Whether the context has been destroyed
+- `run<T>(callback: () => T): Promise<T>` — Executes the callback within a request scope. Request-scoped bindings are created and destroyed within this call.
+- `destroy(): Promise<void>` — Waits for in-flight requests to complete, then destroys all root-scoped bindings.
+- `isDestroyed: boolean` — Whether the context has been destroyed.
 
-### `provide<T>(options: ProvideOptions<T>): Ref<T>`
+### `provide<T>(options): Ref<T>`
 
-Creates a dependency reference that can be resolved within a context.
+Creates a dependency reference that can be resolved within a context. `T` must extend `Defined` (not `null` or `undefined`).
 
-**Parameters:**
+**Options:**
 
-- `options.name: string` - Unique name for the binding
-- `options.scope?: 'root' | 'request'` - Binding scope (default: `'root'`)
-- `options.use?: () => Awaitable<T>` - Factory function to create the value
-- `options.onDestroy?: (value: T, ...args) => Awaitable<void>` - Cleanup callback
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `name` | `string` | — | Unique name for the binding |
+| `scope` | `'root' \| 'request'` | `'root'` | Binding scope |
+| `use` | `() => Awaitable<T>` | — | Factory function. If omitted, the binding must be set with `bindTo`. |
+| `onDestroy` | see below | — | Cleanup callback |
 
-**Returns:** A `Ref<T>` with the following methods:
+The `onDestroy` signature depends on the scope:
 
-- `(): Promise<T>` - Resolve the binding
-- `bindTo(value: T): void` - Manually bind a value
-- `isBound(): boolean` - Check if the binding has been resolved
+- **Root**: `(value: T) => Awaitable<void>`
+- **Request**: `(value: T, result: RequestResult) => Awaitable<void>`
 
-**Type Parameters:**
+Where `RequestResult` is `{ reason: 'success'; result: unknown } | { reason: 'error'; error: unknown }`.
 
-- `T extends Defined` - The type of the value (must be defined, not `null` or `undefined`)
+**Returns:** A `Ref<T>` — a callable reference:
 
-## Scopes
+- `(): Promise<T>` — Resolves the binding, creating it via the factory if needed.
+- `bindTo(value: T): void` — Manually binds a value, bypassing the factory.
+- `isBound(): boolean` — Whether the binding has been resolved in the current scope.
 
-### Root Scope
+## Scopes and Lifecycle
 
-- Bindings are created once and shared across all `context.run()` calls
-- Destroyed when `context.destroy()` is called
-- Useful for singletons, configuration, and shared resources
+Bindings are **lazily created** on first resolution and **cached** within their scope:
 
-### Request Scope
+| | Root Scope | Request Scope |
+|---|---|---|
+| **Created** | On first resolution | On first resolution per `context.run` call |
+| **Shared** | Across all `context.run` calls | Within a single `context.run` call |
+| **Destroyed** | When `context.destroy()` is called | When `context.run` completes (success or error) |
 
-- Bindings are created fresh for each `context.run()` call
-- Destroyed automatically when the request completes (success or error)
-- Useful for request-specific data, user sessions, and temporary resources
-
-## Lifecycle
-
-1. **Creation**: Bindings are lazily created when first resolved
-2. **Resolution**: Subsequent resolutions return the same instance (within scope)
-3. **Destruction**: 
-   - Request-scoped bindings are destroyed when `context.run()` completes
-   - Root-scoped bindings are destroyed when `context.destroy()` is called
-   - Dependencies are destroyed in reverse order of creation
+Bindings are destroyed in **reverse order** of creation.
 
 ## Best Practices
 
-1. **Use root scope for singletons**: Services, configuration, and shared resources
-2. **Use request scope for request-specific data**: User sessions, request IDs, etc.
-3. **Always call `context.destroy()`**: Clean up resources when done
-4. **Handle errors in `onDestroy`**: Use try-catch if cleanup might fail
-5. **Check `isBound()` before use**: Useful for optional dependencies
+1. **Wrap each route handler in `context.run`** — Ensures proper creation and cleanup of request-scoped bindings per request.
+2. **Use root scope for singletons** — Database connections, configuration, and shared services.
+3. **Use request scope for per-request state** — Transactions, user sessions, and temporary resources.
+4. **Keep providers in separate modules** — Enables tree-shaking so each server function only bundles what it uses.
+5. **Provide `onDestroy` for bindings that hold resources** — Connections, file handles, transactions, etc.
 
 ## Ideas
 
@@ -338,16 +254,7 @@ Future enhancements and features under consideration:
 - **Multi Bindings**: Support for binding multiple implementations to the same key, enabling plugin architectures and strategy patterns
 - **Graceful Shutdown**: Enhanced shutdown handling with configurable timeouts, in-flight request completion, and health check integration
 - **HMR Support**: Hot Module Replacement support for development, allowing dependency updates without full application restart
-- **Caching**?
 
 ## License
 
 [MIT](LICENSE)
-
-## Contributing
-
-[Contributing guidelines to be added]
-
-## Support
-
-[Support information to be added]
