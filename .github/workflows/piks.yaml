@@ -7,7 +7,7 @@ on:
       - piks/**
       - piks.yaml
 concurrency:
-  group: push-${{ github.ref }}
+  group: piks-${{ github.ref }}
   cancel-in-progress: true
 env:
   WORKING_DIR: "piks"
