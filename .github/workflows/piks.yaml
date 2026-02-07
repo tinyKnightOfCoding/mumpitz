@@ -5,7 +5,7 @@ on:
       - main
     paths:
       - piks/**
-      - piks.yaml
+      - .github/workflows/piks.yaml
 concurrency:
   group: piks-${{ github.ref }}
   cancel-in-progress: true
