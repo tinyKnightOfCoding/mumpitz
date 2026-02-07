@@ -1,19 +1,19 @@
-name: Check (@mumpitz/di)
+name: Check (@mumpitz/piks)
 on:
   push:
     branches:
       - main
     paths:
-      - di/**
-      - .github/workflows/di.yaml
+      - piks/**
+      - piks.yaml
 concurrency:
   group: push-${{ github.ref }}
   cancel-in-progress: true
 env:
-  WORKING_DIR: "./di"
+  WORKING_DIR: "piks"
 defaults:
   run:
-    working-directory: "./di"
+    working-directory: "piks"
 jobs:
   check:
     runs-on: ubuntu-latest
