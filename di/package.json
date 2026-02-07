@@ -1,5 +1,5 @@
 {
-  "name": "@mumpitz/di",
+  "name": "@mumpitz/piks",
   "version": "0.2.0",
   "type": "module",
   "module": "dist/index.mjs",

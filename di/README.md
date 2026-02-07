@@ -1,6 +1,10 @@
-# @mumpitz/di
+# @mumpitz/piks
 
 A lightweight, type-safe dependency injection library for Node.js-based serverless environments.
+
+## Why "piks"?
+
+*Piks* is German for "jab" — a small, quick needle prick. That's what this library does: it gives your dependencies a tiny poke, just enough to get them where they need to go. No heavy frameworks, no decorators, no magic. Just a little piks.
 
 ## Design Principles
 
@@ -17,14 +21,14 @@ Create a shared context and define a database provider:
 
 ```typescript
 // lib/context.ts
-import { createContext } from '@mumpitz/di'
+import { createContext } from '@mumpitz/piks'
 
 export const context = createContext()
 ```
 
 ```typescript
 // lib/database.ts
-import { provide } from '@mumpitz/di'
+import { provide } from '@mumpitz/piks'
 
 export const database = provide({
   name: 'database',
@@ -61,7 +65,7 @@ Root-scoped bindings are created once and shared across all requests within the 
 
 ```typescript
 // lib/database.ts
-import { provide } from '@mumpitz/di'
+import { provide } from '@mumpitz/piks'
 
 export const database = provide({
   name: 'database',
@@ -102,7 +106,7 @@ Request-scoped bindings are created fresh for each `context.run` call and destro
 
 ```typescript
 // lib/transaction.ts
-import { provide } from '@mumpitz/di'
+import { provide } from '@mumpitz/piks'
 import { database } from './database'
 
 export const transaction = provide({
@@ -145,7 +149,7 @@ Use `bindTo` to inject values that are not created by a factory. This is useful 
 
 ```typescript
 // lib/request.ts
-import { provide } from '@mumpitz/di'
+import { provide } from '@mumpitz/piks'
 import type { NextRequest } from 'next/server'
 
 export const nextRequest = provide<NextRequest>({
