@@ -1,0 +1,30 @@
+{
+  "name": "schnack",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "pnpm exec tsx src/index.ts",
+    "check:lint": "biome ci --error-on-warnings .",
+    "check:types": "tsc --noEmit",
+    "check:circular": "madge --ts-config tsconfig.json --circular --extensions ts src",
+    "lint": "biome check --error-on-warnings --write .",
+    "test": "vitest run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.26.2",
+  "devDependencies": {
+    "@biomejs/biome": "2.4.1",
+    "tsx": "4.19.2",
+    "@types/node": "25.2.3",
+    "madge": "8.0.0",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "@mariozechner/pi-agent-core": "0.52.12",
+    "@mariozechner/pi-ai": "0.52.12",
+    "dotenv": "17.3.1"
+  }
+}

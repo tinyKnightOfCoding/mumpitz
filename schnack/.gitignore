@@ -1,0 +1,16 @@
+# IDE
+.idea
+*.iml
+
+# MacOS
+.DS_Store
+
+# Outputs
+dist
+.next
+.turbo
+.vercel
+.cache
+
+# Dependencies
+node_modules
