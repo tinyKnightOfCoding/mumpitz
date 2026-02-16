@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { completeSimple, getModel } from '@mariozechner/pi-ai'
 import { extractJson } from './parse.js'
+import type { SessionLogger } from './session.js'
 import type { Character, Scene, World } from './types.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -16,7 +17,7 @@ function getModelConfig() {
   return getModel('anthropic', 'claude-sonnet-4-5')
 }
 
-export async function generateWorld(initialPrompt: string): Promise<World> {
+export async function generateWorld(initialPrompt: string, session?: SessionLogger): Promise<World> {
   const systemPrompt = loadPrompt('world-generation')
   const model = getModelConfig()
 
@@ -35,6 +36,7 @@ export async function generateWorld(initialPrompt: string): Promise<World> {
     typeof response.content[0] === 'object' && 'text' in response.content[0]
       ? (response.content[0] as { text: string }).text
       : String(response.content[0])
+  session?.write('world', text)
   return extractJson<World>(text)
 }
 
@@ -42,6 +44,8 @@ export async function generateCharacter(
   initialPrompt: string,
   world: World,
   existingCharacterNames: string[],
+  session?: SessionLogger,
+  index?: number,
 ): Promise<Character> {
   const systemPrompt = loadPrompt('character-generation')
   const model = getModelConfig()
@@ -67,10 +71,16 @@ Already created characters (ensure different concepts): ${existingCharacterNames
     typeof response.content[0] === 'object' && 'text' in response.content[0]
       ? (response.content[0] as { text: string }).text
       : String(response.content[0])
+  session?.write(`character-${index ?? '?'}`, text)
   return extractJson<Character>(text)
 }
 
-export async function generateScene(initialPrompt: string, world: World, characters: Character[]): Promise<Scene> {
+export async function generateScene(
+  initialPrompt: string,
+  world: World,
+  characters: Character[],
+  session?: SessionLogger,
+): Promise<Scene> {
   const systemPrompt = loadPrompt('scene-generation')
   const model = getModelConfig()
 
@@ -94,5 +104,6 @@ ${characters.map((c) => `- ${c.name}: ${c.concept} (${c.motivation})`).join('\n'
     typeof response.content[0] === 'object' && 'text' in response.content[0]
       ? (response.content[0] as { text: string }).text
       : String(response.content[0])
+  session?.write('scene', text)
   return extractJson<Scene>(text)
 }

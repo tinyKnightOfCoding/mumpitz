@@ -1,5 +1,6 @@
 import { generateCharacter, generateScene, generateWorld } from './generators.js'
 import { characterTurn, getStat, gmTurn, type PlayTurn, resolveRoll } from './play.js'
+import { createSession } from './session.js'
 import type { Character, Scene, World } from './types.js'
 
 const MAX_TURNS = 25
@@ -11,11 +12,15 @@ export type GameState = {
   turnHistory: PlayTurn[]
   activeThreats: string[]
   changedConditions: string[]
+  sessionId: string
 }
 
 export async function runGame(initialPrompt: string): Promise<GameState> {
-  console.log('\n🏔️  Generating world...\n')
-  const world = await generateWorld(initialPrompt)
+  const session = createSession(initialPrompt)
+  console.log(`\n📁 Session: ${session.sessionId} (raw AI output → sessions/${session.sessionId}/)\n`)
+
+  console.log('🏔️  Generating world...\n')
+  const world = await generateWorld(initialPrompt, session)
   console.log(`   Setting: ${world.setting.name}`)
   console.log(`   Danger: ${world.danger.name}\n`)
 
@@ -23,14 +28,14 @@ export async function runGame(initialPrompt: string): Promise<GameState> {
   const characters: Character[] = []
   for (let i = 0; i < 3; i++) {
     const names = characters.map((c) => c.name)
-    const c = await generateCharacter(initialPrompt, world, names)
+    const c = await generateCharacter(initialPrompt, world, names, session, i + 1)
     characters.push(c)
     console.log(`   ${c.name}: ${c.concept}`)
   }
   console.log('')
 
   console.log('🎭 Generating scene...\n')
-  const scene = await generateScene(initialPrompt, world, characters)
+  const scene = await generateScene(initialPrompt, world, characters, session)
   console.log(`   Location: ${scene.location}`)
   console.log(`   ${scene.opening_situation}\n`)
 
@@ -41,6 +46,7 @@ export async function runGame(initialPrompt: string): Promise<GameState> {
     turnHistory: [],
     activeThreats: scene.hidden_elements.concat(),
     changedConditions: [],
+    sessionId: session.sessionId,
   }
 
   console.log('━'.repeat(60))
@@ -51,6 +57,8 @@ export async function runGame(initialPrompt: string): Promise<GameState> {
   let rollResultToInterpret: string | undefined
   let promptCharacter: string | null = 'OPEN'
   let turnCount = 0
+  let gmTurnIndex = 0
+  const charTurnIndexByPlayer: Record<string, number> = {}
 
   while (turnCount < MAX_TURNS) {
     turnCount++
@@ -61,7 +69,8 @@ export async function runGame(initialPrompt: string): Promise<GameState> {
       : lastCharacterAction
     rollResultToInterpret = undefined
 
-    const gmResponse = await gmTurn(world, characters, scene, state.turnHistory, gmContext)
+    gmTurnIndex++
+    const gmResponse = await gmTurn(world, characters, scene, state.turnHistory, gmContext, session, gmTurnIndex)
 
     const gmContent = gmResponse.gm_narration
     if (gmResponse.private_messages) {
@@ -124,7 +133,9 @@ export async function runGame(initialPrompt: string): Promise<GameState> {
       .map((c) => `${c.name}: ${c.concept}`)
       .join('; ')
 
-    const charResponse = await characterTurn(char, scene, gmContent, privateContext, otherChars)
+    const charTurnIndex = (charTurnIndexByPlayer[char.name] ?? 0) + 1
+    charTurnIndexByPlayer[char.name] = charTurnIndex
+    const charResponse = await characterTurn(char, scene, gmContent, privateContext, otherChars, session, charTurnIndex)
 
     const actionText = charResponse.dialogue ? `${charResponse.action} "${charResponse.dialogue}"` : charResponse.action
     lastCharacterAction = actionText

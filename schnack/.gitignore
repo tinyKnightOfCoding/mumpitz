@@ -12,5 +12,13 @@ dist
 .vercel
 .cache
 
+# Debug session output (raw AI responses)
+sessions/
+
+# Env
+.env
+.env.*
+!.env.example
+
 # Dependencies
 node_modules

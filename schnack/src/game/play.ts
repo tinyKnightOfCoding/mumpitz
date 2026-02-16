@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { completeSimple, getModel } from '@mariozechner/pi-ai'
 import { extractJson, interpretRoll, roll2d6PlusStat } from './parse.js'
+import type { SessionLogger } from './session.js'
 import type { Character, CharacterResponse, GMResponse, Scene, World } from './types.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -36,6 +37,8 @@ export async function gmTurn(
   scene: Scene,
   turnHistory: PlayTurn[],
   lastCharacterAction?: string,
+  session?: SessionLogger,
+  gmTurnIndex?: number,
 ): Promise<GMResponse> {
   const systemPrompt = loadPrompt('gm')
   const rulesPrompt = loadPrompt('rules')
@@ -89,6 +92,7 @@ Respond with your GM JSON.
   })
 
   const text = extractText(response.content)
+  session?.write(`gm-turn-${String(gmTurnIndex ?? 0).padStart(2, '0')}`, text)
   return extractJson<GMResponse>(text)
 }
 
@@ -98,6 +102,8 @@ export async function characterTurn(
   situationDescription: string,
   privateContext: string,
   otherCharactersInfo: string,
+  session?: SessionLogger,
+  charTurnIndex?: number,
 ): Promise<CharacterResponse> {
   const systemPrompt = loadPrompt('character')
 
@@ -137,6 +143,8 @@ The GM has prompted you. What do you do? Respond with your action JSON only.
   })
 
   const text = extractText(response.content)
+  const safeName = character.name.replace(/\W+/g, '-')
+  session?.write(`character-${safeName}-turn-${String(charTurnIndex ?? 0).padStart(2, '0')}`, text)
   return extractJson<CharacterResponse>(text)
 }
 

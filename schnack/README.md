@@ -30,6 +30,18 @@ With a custom prompt:
 pnpm start "Medieval heist: three thieves steal a dragon egg from a wizard tower"
 ```
 
+## Debug Sessions
+
+Each run creates a session with a unique ID. Raw AI output is written to `sessions/{session-id}/` for debugging:
+
+- `00-initial-prompt.txt` – The prompt that started the run
+- `01-world.txt` – World generation response
+- `02-character-1.txt`, `03-character-2.txt`, `04-character-3.txt` – Character generation
+- `05-scene.txt` – Scene generation
+- `06-gm-turn-01.txt`, `07-character-Name-turn-01.txt`, … – Play loop responses
+
+The session ID is printed at the start of each run.
+
 ## Tech
 
 - **@mariozechner/pi-ai** – LLM calls via `completeSimple`
