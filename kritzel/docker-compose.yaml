@@ -1,0 +1,11 @@
+version: '3'
+services:
+  kritzel:
+    image: 'postgres:latest'
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: kritzel
+      POSTGRES_PASSWORD: kritzel
+      POSTGRES_DB: kritzel
+    restart: unless-stopped

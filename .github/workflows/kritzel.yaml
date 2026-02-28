@@ -1,0 +1,46 @@
+name: Check (@mumpitz/kritzel)
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - kritzel/**
+      - .github/workflows/kritzel.yaml
+concurrency:
+  group: kritzel-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  WORKING_DIR: "piks"
+defaults:
+  run:
+    working-directory: "piks"
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: "${{ env.WORKING_DIR }}/package.json"
+          cache: true
+      - name: install node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "${{ env.WORKING_DIR }}/.nvmrc"
+          cache-dependency-path: "${{ env.WORKING_DIR }}/pnpm-lock.yaml"
+          cache: "pnpm"
+      - name: install dependencies
+        run: "pnpm i --frozen-lockfile --ignore-scripts"
+      - name: lint
+        run: "pnpm check:lint"
+      - name: types
+        run: "pnpm check:types"
+      - name: circular dependencies
+        run: "pnpm check:circular"
+      - name: test
+        run: "pnpm test"
